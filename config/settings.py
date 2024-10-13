@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'authen',
     'admin_account',
+    'customer_account',
 ]
 
 MIDDLEWARE = [

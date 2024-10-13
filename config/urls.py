@@ -27,6 +27,7 @@ urlpatterns = [
 
     path('', include('authen.urls')),
     path('', include('admin_account.urls')),
+    path('customer_account/', include('customer_account.urls')),
 ]
 
 if settings.DEBUG:

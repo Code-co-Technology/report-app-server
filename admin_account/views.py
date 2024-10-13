@@ -1,21 +1,11 @@
-from rest_framework import status, generics
+from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.decorators import action
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from django.utils.http import urlsafe_base64_encode
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.contrib.auth import authenticate
-from django.contrib.auth import update_session_auth_hash
-from django.utils.encoding import smart_bytes
 from django.contrib.auth.models import Group
-from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 
 from drf_yasg.utils import swagger_auto_schema
@@ -23,8 +13,7 @@ from drf_yasg import openapi
 
 from utils.pagination import PaginationList
 from utils.renderers import UserRenderers
-from utils.permissions import IsLogin, IsAdmin
-from utils.utils import Util
+from utils.permissions import IsAdmin
 
 from authen.models import CustomUser
 from admin_account.serializers import UsersSerializer, ActivateUserSerializer, UsersGroupSerizliers

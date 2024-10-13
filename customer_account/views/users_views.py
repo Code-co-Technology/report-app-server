@@ -1,22 +1,11 @@
-from rest_framework import status, generics
+from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.decorators import action
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from django.utils.http import urlsafe_base64_encode
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.contrib.auth import authenticate
-from django.contrib.auth import update_session_auth_hash
-from django.utils.encoding import smart_bytes
 from django.contrib.auth.models import Group
-from django.contrib.auth import authenticate
-from django.core.mail import send_mail
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -24,15 +13,12 @@ from drf_yasg import openapi
 from utils.pagination import PaginationList
 from utils.renderers import UserRenderers
 from utils.permissions import IsCustomer
-from utils.utils import Util
 
 from authen.models import CustomUser
-from customer_account.serializers import CustomerGorupsUserSerializer, CustumerAddUserSerializer, CustomUsersSerializer
-
+from customer_account.serializers.users_serializers import CustomerGorupsUserSerializer, CustumerAddUserSerializer, CustomUsersSerializer, CustomUserSerializer
 
 
 """ All functions for managing users for the Customers Role """
-
 
 class CustumerUserGroupView(APIView):
     render_classes = [UserRenderers]
@@ -66,7 +52,7 @@ class CustumerUsersView(APIView):
         ],
         responses={200: CustomUsersSerializer(many=True)},
         operation_summary='Custumers all users',
-        operation_description='Custumers all users except the custumer role. Filters can be applied based on search query, active profile status, and user role.'
+        operation_description='Customer-related employees arrive. Filters can be applied based on search query, active profile status, and user role.'
     )
     def get(self, request):
         instances = CustomUser.objects.filter(company=request.user.company, groups__name__in=['contractors', 'user']).order_by('-id')
@@ -97,3 +83,58 @@ class CustumerUsersView(APIView):
         paginated_instances = paginator.paginate_queryset(instances, request)
         serializer = CustomUsersSerializer(paginated_instances, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
+
+    @swagger_auto_schema(
+        tags=['Custumer Account'],
+        request_body=CustumerAddUserSerializer,
+        operation_summary='Add a customer employee.',
+        operation_description='Customer can add employee to your company. \nGroups: \n1. contractors \n2. user'
+    )
+    def post(self, request):
+        serializer = CustumerAddUserSerializer(data=request.data, request={'company':request.user.company})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response({'message': 'Вы зарегистрировались. Подождите, пока ваш профиль будет одобрен администратором.'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CustomerUserView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsCustomer]
+
+    @swagger_auto_schema(
+        tags=['Custumer Account'],
+        responses={200: CustomUsersSerializer(many=False)},
+        operation_summary='Custumers get by user id',
+        operation_description='Custumers get by user id'
+    )
+    def get(self, request, pk):
+        instance = get_object_or_404(CustomUser, company=request.user.company, id=pk)
+        serializer = CustomUsersSerializer(instance, context={'request':request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(
+        tags=['Custumer Account'],
+        request_body=CustomUserSerializer,
+        operation_summary='Custumers put by user id',
+        operation_description='This last point can change the information about your employees. Customer only.'
+    )
+    def put(self, request, pk):
+        queryset = get_object_or_404(CustomUser, company=request.user.company, id=pk)
+        serializer = CustomUserSerializer(context={'request': request}, instance=queryset, data=request.data, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @swagger_auto_schema(
+        tags=['Custumer Account'],
+        responses={204:  'No Content'},
+        operation_summary='Custumers deleted by user id',
+        operation_description='A customer can only delete his own employee.'
+    )
+    def delete(self, request, pk):
+        user_delet = get_object_or_404(CustomUser, company=request.user.company, id=pk)
+        user_delet.delete()
+        return Response({"message": "Пользователь удален"}, status=status.HTTP_204_NO_CONTENT)

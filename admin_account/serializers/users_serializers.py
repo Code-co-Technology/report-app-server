@@ -1,5 +1,4 @@
 from rest_framework import serializers
-
 from django.contrib.auth.models import Group
 
 from authen.models import CustomUser, Company
@@ -35,7 +34,7 @@ class ActivateUserSerializer(serializers.ModelSerializer):
         fields = ['id', 'activate_profile']
 
     def update(self, instance, validated_data):
-        instance.activate_profile = validated_data.get("activate_profile", instance.activate_profile)
+        instance.activate_profile = validated_data.get('activate_profile', instance.activate_profile)
         instance.save()
 
         return instance

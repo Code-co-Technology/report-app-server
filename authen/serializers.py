@@ -60,6 +60,30 @@ class UserSignUpSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(str(exc))
 
         return value
+    
+    def validate(self, attrs):
+        email = attrs.get('email')
+        phone = attrs.get('phone')
+        name_company = attrs.get('name_company')
+        inn_company = attrs.get('inn_company')
+        ogrn = attrs.get('ogrn')
+
+        if CustomUser.objects.filter(email=email).exists():
+            raise serializers.ValidationError({'error': 'Электронная почта должна быть уникальной. Этот адрес электронной почты принадлежит другому пользователю.'})
+
+        if CustomUser.objects.filter(phone=phone).exists():
+            raise serializers.ValidationError({'error': 'Номер телефона должен быть уникальным. Этот номер телефона принадлежит другому пользователю.'})
+
+        if name_company and Company.objects.filter(name=name_company).exists():
+            raise serializers.ValidationError({'error': 'Название компании должно быть уникальным.'})
+
+        if inn_company and CustomUser.objects.filter(inn_company=inn_company).exists():
+            raise serializers.ValidationError({'error': 'ИНН должен быть уникальным.'})
+
+        if ogrn and CustomUser.objects.filter(ogrn=ogrn).exists():
+            raise serializers.ValidationError({'error': 'ОГРН должен быть уникальным.'})
+
+        return attrs
 
     def create(self, validated_data):
 

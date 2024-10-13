@@ -1,5 +1,5 @@
 from django.urls import path
-from admin_account.views import UsersView, ActivateUsersView, UserNoActiveView, UserGroupView
+from admin_account.views.users_views import UsersView, ActivateUsersView, UserNoActiveView, UserGroupView
 
 urlpatterns = [
     path('admin_account/users/', UsersView.as_view()),

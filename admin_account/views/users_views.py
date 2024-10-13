@@ -16,7 +16,7 @@ from utils.renderers import UserRenderers
 from utils.permissions import IsAdmin
 
 from authen.models import CustomUser
-from admin_account.serializers import UsersSerializer, ActivateUserSerializer, UsersGroupSerizliers
+from admin_account.serializers.users_serializers import UsersSerializer, ActivateUserSerializer, UsersGroupSerizliers
 
 """ All functions for managing users for the Admin Role """
 
@@ -132,7 +132,7 @@ class ActivateUsersView(APIView):
     )
     def patch(self, request, pk):
         queryset = get_object_or_404(CustomUser, id=pk)
-        serializer = ActivateUserSerializer(context={"request": request}, instance=queryset, data=request.data, partial=True)
+        serializer = ActivateUserSerializer(context={'request': request}, instance=queryset, data=request.data, partial=True)
         if serializer.is_valid(raise_exception=True):
             user = serializer.save()
             if user.activate_profile:
@@ -145,5 +145,3 @@ class ActivateUsersView(APIView):
                 )
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-

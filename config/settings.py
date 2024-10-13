@@ -26,6 +26,7 @@ ALLOWED_HOSTS = [os.environ["ALLOWED_HOSTS"]]
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'drf_yasg',
     'authen',
+    'admin_account',
 ]
 
 MIDDLEWARE = [
@@ -141,7 +143,7 @@ AUTHENTICATION_BACKENDS = [
     # 'authen.authentication.EmailOrUsernameModelBackend',
 ]
 
-# AUTH_USER_MODEL = "authen.CustomUser"
+AUTH_USER_MODEL = "authen.CustomUser"
 
 CORS_ALLOWED_ORIGINS = [
     os.environ["SITE1"],
@@ -187,3 +189,13 @@ SIMPLE_JWT = {
 }
 
 AUTHENTICATION_CLASSES = ("dj_rest_auth.authentication.AllAuthJWTAuthentication",)
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ["EMAIL_HOST"]
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
+EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
+DEFAULT_FROM_EMAIL = os.environ["DEFAULT_FROM_EMAIL"]

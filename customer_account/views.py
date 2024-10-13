@@ -51,7 +51,7 @@ class CustumerUserGroupView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class UsersView(APIView):
+class CustumerUsersView(APIView):
     render_classes = [UserRenderers]
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsCustomer]

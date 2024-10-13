@@ -14,7 +14,7 @@ from authen.models import CustomUser, Company
 class CustomerGorupsUserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        modell = Group
+        model = Group
         fields = ['id', 'name']
 
 

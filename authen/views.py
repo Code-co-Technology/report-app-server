@@ -27,8 +27,13 @@ from authen.models import CustomUser, Company
 from authen.serializers import (
     UserGroupSerizliers,
     UserSignUpSerializer,
+    UserContractorsRegisterSerializer,
     UserSigInSerializer,
     UserInformationSerializer,
+    UserUpdateSerializer,
+    ChangePasswordSerializer,
+    ResetPasswordSerializer,
+    PasswordResetCompleteSerializer,
 )
 
 
@@ -52,6 +57,17 @@ class UserSignUp(APIView):
     @swagger_auto_schema(tags=["Auth"], request_body=UserSignUpSerializer)
     def post(self, request):
         serializer = UserSignUpSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            instanse = serializer.save()
+            return Response({'message': 'Вы зарегистрировались. Подождите, пока ваш профиль будет одобрен администратором. На ваш адрес электронной почты будет отправлено сообщение.'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserContractorRegister(APIView):
+    render_classes = [UserRenderers]
+
+    @swagger_auto_schema(tags=["Auth"], request_body=UserContractorsRegisterSerializer)
+    def post(self, request):
+        serializer = UserContractorsRegisterSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             instanse = serializer.save()
             return Response({'message': 'Вы зарегистрировались. Подождите, пока ваш профиль будет одобрен администратором. На ваш адрес электронной почты будет отправлено сообщение.'}, status=status.HTTP_200_OK)
@@ -97,3 +113,92 @@ class UserProfile(APIView):
     def get(self, request):
         serializer = UserInformationSerializer(request.user, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(tags=['Auth'], request_body=UserUpdateSerializer)
+    def put(self, request):
+        queryset = get_object_or_404(CustomUser, id=request.user.id)
+        serializer = UserUpdateSerializer(context={"request": request}, instance=queryset, data=request.data, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(tags=['Auth'], responses={204:  'No Content'})
+    def delete(self, request):
+        user_delete = CustomUser.objects.get(id=request.user.id)
+        user_delete.delete()
+        return Response({"message": "delete success"}, status=status.HTTP_204_NO_CONTENT)
+
+
+class UserInformationView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsLogin]
+
+    @swagger_auto_schema(tags=["Auth"], responses={200: UserInformationSerializer(many=True)})
+    def get(self, request, pk):
+        objects = get_object_or_404(CustomUser, id=pk)
+        serializer = UserInformationSerializer(objects, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+@swagger_auto_schema(
+        tags=['Auth'],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'new_password': openapi.Schema(type=openapi.TYPE_STRING, description='new_password'),
+                'confirm_password': openapi.Schema(type=openapi.TYPE_STRING, description='confirm_password'),
+            }
+        )
+    )
+@permission_classes([IsAuthenticated])
+@permission_classes([IsLogin])
+def change_password(request):
+    if request.method == "POST":
+        serializer = ChangePasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            user = request.user
+            user.set_password(serializer.data.get("new_password"))
+            user.save()
+            update_session_auth_hash(request, user)
+            return Response({"error": "Пароль успешно изменен."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class RequestPasswordRestEmail(generics.GenericAPIView):
+    serializer_class = ResetPasswordSerializer
+
+    @swagger_auto_schema(tags=['Forget Password'], request_body=ResetPasswordSerializer)
+    @action(methods=['post'], detail=False)
+    def post(self, request):
+        email = request.data.get("email")
+        if CustomUser.objects.filter(email=email).exists():
+            user = CustomUser.objects.get(email=email)
+            uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
+            token = PasswordResetTokenGenerator().make_token(user)
+            absurl = f"http://127.0.0.1:8000/reset-password/{uidb64}/{token}"
+            email_body = f"Здравствуйте! \n Используйте ссылку ниже для сброса пароля \n ссылка: {absurl}"
+            data = {
+                "email_body": email_body,
+                "to_email": user.email,
+                "email_subject": "Сбросьте свой пароль",
+            }
+
+            Util.send(data)
+
+            return Response({"message": "На электронную почту было отправлено письмо для сброса пароля"}, status=status.HTTP_200_OK)
+        return Response({"error": "Этот адрес электронной почты не найден."}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+class SetNewPasswordView(generics.GenericAPIView):
+    serializer_class = PasswordResetCompleteSerializer
+
+    @swagger_auto_schema(tags=['Forget Password'], request_body=PasswordResetCompleteSerializer)
+    @action(methods=['patch'], detail=False)
+    def patch(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response({"message": "Пароль изменен."}, status=status.HTTP_200_OK)

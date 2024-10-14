@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'authen',
     'admin_account',
     'customer_account',
+    'contractors_app',
 ]
 
 MIDDLEWARE = [

@@ -66,7 +66,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     processing_orders = models.BooleanField(default=False, verbose_name='Обработка предписаний. Для Сотрудники')
     company = models.ForeignKey(
         'Company', 
-        on_delete=models.SET_NULL, 
+        on_delete=models.CASCADE, 
         null=True, 
         blank=True, 
         verbose_name="Компания",

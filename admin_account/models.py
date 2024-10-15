@@ -20,11 +20,11 @@ class Project(models.Model):
     submission_deadline = models.DateField(verbose_name='Дедлайн по сдаче')
     contractor = models.ManyToManyField(CustomUser, blank=True, related_name='contractor', verbose_name='Подрядчики')
     status = models.ForeignKey(ProjectStatus, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Статус')
-    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='onwer', verbose_name='Создатель')
+    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True, related_name='onwer', verbose_name='Создатель')
     create_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        return self.address
 
     class Meta:
         db_table = "project"

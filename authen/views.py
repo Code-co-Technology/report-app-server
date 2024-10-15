@@ -34,6 +34,9 @@ from authen.serializers import (
     ChangePasswordSerializer,
     ResetPasswordSerializer,
     PasswordResetCompleteSerializer,
+    UserInformationAdminSerializer,
+    UserInformationCustomerSerializer,
+    UserInformationContractorSerializer,
 )
 
 
@@ -111,6 +114,17 @@ class UserProfile(APIView):
 
     @swagger_auto_schema(tags=["Auth"], responses={200: UserInformationSerializer(many=True)})
     def get(self, request):
+        user = request.user
+
+        if user.groups.filter(name="admin").exists():
+            serializer = UserInformationAdminSerializer(user, context={"request": request})
+
+        elif user.groups.filter(name="customer").exists():
+            serializer = UserInformationCustomerSerializer(user, context={"request": request})
+
+        elif user.groups.filter(name="contractors").exists():
+            serializer = UserInformationContractorSerializer(user, context={"request": request})
+
         serializer = UserInformationSerializer(request.user, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -138,7 +152,17 @@ class UserInformationView(APIView):
     @swagger_auto_schema(tags=["Auth"], responses={200: UserInformationSerializer(many=True)})
     def get(self, request, pk):
         objects = get_object_or_404(CustomUser, id=pk)
-        serializer = UserInformationSerializer(objects, context={"request": request})
+
+        if objects.groups.filter(name="admin").exists():
+            serializer = UserInformationAdminSerializer(objects, context={"request": request})
+
+        elif objects.groups.filter(name="customer").exists():
+            serializer = UserInformationCustomerSerializer(objects, context={"request": request})
+
+        elif objects.groups.filter(name="contractors").exists():
+            serializer = UserInformationContractorSerializer(objects, context={"request": request})
+
+        serializer = UserInformationSerializer(request.user, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

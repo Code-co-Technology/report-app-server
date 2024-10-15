@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, JSONParser, FormParser
 
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
@@ -19,6 +20,7 @@ class AdminProjectsView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdmin]
     pagination_class = PaginationList
+    parser_classes = [MultiPartParser, FormParser, JSONParser] 
 
     @swagger_auto_schema(
         tags=['Admin Account Project'],
@@ -37,6 +39,7 @@ class AdminProjectsView(APIView):
     @swagger_auto_schema(
         tags=['Admin Account Project'],
         request_body=AdminCreateProjectSerializer,
+        consumes=['application/json', 'multipart/form-data'],
         operation_summary='Create a new project.',
         operation_description='Admin adds new project. \nRequired fields: \n1. address \n2. opening_date \n3. submission_deadline')
     def post(self, request):

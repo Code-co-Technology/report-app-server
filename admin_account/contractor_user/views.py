@@ -14,6 +14,8 @@ from authen.models import CustomUser, Overdue, FailedReports
 from admin_account.contractor_user.serializers import AdminOverdueSerializer, AdminFailedReportsSerializer, AdminContractorUserSerializer, AdminContractorUserUpdateSerializer
 
 
+
+
 class AdminOverdueView(APIView):
     render_classes = [UserRenderers]
     authentication_classes = [JWTAuthentication]
@@ -46,6 +48,27 @@ class AdminFailedReportsView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class AdminContractorFalseUsersView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdmin]
+    pagination_class = PaginationList
+
+    @swagger_auto_schema(
+        tags=['Admin Account Contractor User'],
+        responses={200: AdminContractorUserSerializer(many=True)},
+        operation_summary='Newly registered and Inactive',
+        operation_description='Contractor is all non-Active users. For admin role only. For admin role only'
+    )
+    def get(self, request):
+        instances = CustomUser.objects.filter(activate_profile=False, groups__name__in=['contractors']).order_by('-id')
+        # Pagination logic
+        paginator = self.pagination_class()
+        paginated_instances = paginator.paginate_queryset(instances, request)
+        serializer = AdminContractorUserSerializer(paginated_instances, many=True, context={'request':request})
+        return paginator.get_paginated_response(serializer.data)
+
+
 class AdminContractorUsersView(APIView):
     render_classes = [UserRenderers]
     authentication_classes = [JWTAuthentication]
@@ -55,15 +78,16 @@ class AdminContractorUsersView(APIView):
     @swagger_auto_schema(
         tags=['Admin Account Contractor User'],
         responses={200: AdminContractorUserSerializer(many=True)},
-        operation_description='Contractors all users. For Admin role only'
+        operation_summary='Those who are active',
+        operation_description='Contractor are all Active users. For Admin role only'
     )
     def get(self, request):
-        instances = CustomUser.objects.filter(groups__name__in=['contractors']).order_by('-id')
+        instances = CustomUser.objects.filter(activate_profile=True, groups__name__in=['contractors']).order_by('-id')
         # Pagination logic
         paginator = self.pagination_class()
         paginated_instances = paginator.paginate_queryset(instances, request)
         serializer = AdminContractorUserSerializer(paginated_instances, many=True, context={'request':request})
-        return paginator.get_paginated_response(serializer.data, status=status.HTTP_200_OK)
+        return paginator.get_paginated_response(serializer.data)
 
 
 class AdminContractorUserView(APIView):

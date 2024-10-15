@@ -14,7 +14,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework.exceptions import AuthenticationFailed
 
-from authen.models import CustomUser, Company
+from authen.models import CustomUser, Company, Overdue, FailedReports
 
 
 class IncorrectCredentialsError(serializers.ValidationError):
@@ -80,13 +80,13 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         if CustomUser.objects.filter(phone=phone).exists():
             raise serializers.ValidationError({'error': 'Номер телефона должен быть уникальным. Этот номер телефона принадлежит другому пользователю.'})
 
-        if name_company and Company.objects.filter(name=name_company).exists():
+        if name_company and Company.objects.filter(name_company=name_company).exists():
             raise serializers.ValidationError({'error': 'Название компании должно быть уникальным.'})
 
-        if inn_company and CustomUser.objects.filter(inn_company=inn_company).exists():
+        if inn_company and Company.objects.filter(inn_company=inn_company).exists():
             raise serializers.ValidationError({'error': 'ИНН должен быть уникальным.'})
 
-        if ogrn and CustomUser.objects.filter(ogrn=ogrn).exists():
+        if ogrn and Company.objects.filter(ogrn=ogrn).exists():
             raise serializers.ValidationError({'error': 'ОГРН должен быть уникальным.'})
 
         return attrs
@@ -203,6 +203,74 @@ class UserInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'email', 'first_name', 'last_name', 'phone', 'avatar', 'activate_profile', 'groups', 'company']
+
+
+class UserInformationAdminSerializer(serializers.ModelSerializer):
+    groups = UserGroupSerizliers(many=True, read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'email', 'first_name', 'last_name', 'phone', 'avatar', 'groups']
+
+
+class OverdueSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Overdue
+        fields = ['id', 'name']
+
+
+class FailedReportsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FailedReports
+        fields = ['id', 'name']
+
+class UserInformationContractorSerializer(serializers.ModelSerializer):
+    groups = UserGroupSerizliers(many=True, read_only=True)
+    overdue = OverdueSerializer(read_only=True)
+    failed_reports = FailedReportsSerializer(read_only=True)
+    company = CompanySerializers(read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            'id',
+            'email',
+            'first_name',
+            'last_name',
+            'phone',
+            'avatar',
+            'activate_profile',
+            'groups',
+            'company',
+            'overdue',
+            'failed_reports',
+            'penalty',
+            'block_contractor',
+            'block_sending_report'
+        ]
+
+
+class UserInformationCustomerSerializer(serializers.ModelSerializer):
+    groups = UserGroupSerizliers(many=True, read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            'id',
+            'email',
+            'first_name',
+            'last_name',
+            'phone',
+            'avatar',
+            'activate_profile',
+            'groups',
+            'activate_profile',
+            'report_processing',
+            'creating_prescriptions',
+            'processing_orders',
+        ]
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):

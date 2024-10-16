@@ -26,7 +26,7 @@ class ContractorUserGroupView(APIView):
     permission_classes = [IsContractors]
 
     @swagger_auto_schema(
-        tags=['Contractor Account'],
+        tags=['Contractor Account User'],
         responses={200: ContractorGorupsUserSerializer(many=True)},
         operation_summary='All roles are for Contractor',
         operation_description='All roles are for Contractor.'
@@ -44,7 +44,7 @@ class ContractorUsersView(APIView):
     pagination_class = PaginationList
 
     @swagger_auto_schema(
-        tags=['Contractor Account'],
+        tags=['Contractor Account User'],
         manual_parameters=[
             openapi.Parameter('q', openapi.IN_QUERY, description='Search query for filtering by First Name, Last Name, Email fields', type=openapi.TYPE_STRING),
             openapi.Parameter('activate_profile', openapi.IN_QUERY, description='Filter by active profile status (true/false)', type=openapi.TYPE_BOOLEAN),
@@ -80,7 +80,7 @@ class ContractorUsersView(APIView):
         return paginator.get_paginated_response(serializer.data)
 
     @swagger_auto_schema(
-        tags=['Contractor Account'],
+        tags=['Contractor Account User'],
         request_body=ContractorAddUserSerializer,
         operation_summary='Add a Contractor employee.',
         operation_description='Contractor can add employee to your company.'
@@ -99,7 +99,7 @@ class ContractorUserView(APIView):
     permission_classes = [IsContractors]
 
     @swagger_auto_schema(
-        tags=['Contractor Account'],
+        tags=['Contractor Account User'],
         responses={200: ContractorUsersSerializer(many=False)},
         operation_summary='Contractor get by user id',
         operation_description='Contractor get by user id'
@@ -110,7 +110,7 @@ class ContractorUserView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     @swagger_auto_schema(
-        tags=['Contractor Account'],
+        tags=['Contractor Account User'],
         request_body=ContractorUserSerializer,
         operation_summary='Contractor put by user id',
         operation_description='This last point can change the information about your employees. Contractor only.'
@@ -124,7 +124,7 @@ class ContractorUserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @swagger_auto_schema(
-        tags=['Contractor Account'],
+        tags=['Contractor Account User'],
         responses={204:  'No Content'},
         operation_summary='Contractor deleted by user id',
         operation_description='A Contractor can only delete his own employee.'

@@ -1,6 +1,5 @@
 from rest_framework import serializers
 
-from report_app.reports.serializers import BobSerializers, TypeOfWorkSerializer
 from report_app.models import ReportsName, Reports, RespostComment
 
 

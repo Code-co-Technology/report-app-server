@@ -72,6 +72,7 @@ class ContractorAddUserSerializer(serializers.ModelSerializer):
         username = email.split("@")[0]
         create = get_user_model().objects.create_user(username=username, **validated_data)
         create.activate_profile = True
+        create.company = self.context.get('company')
         create.groups.set(groups_data)
         return create
 

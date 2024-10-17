@@ -86,7 +86,7 @@ class ContractorUsersView(APIView):
         operation_description='Contractor can add employee to your company.'
     )
     def post(self, request):
-        serializer = ContractorAddUserSerializer(data=request.data, request={'company':request.user.company})
+        serializer = ContractorAddUserSerializer(data=request.data, context={'company':request.user.company})
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response({'message': 'Вы зарегистрировались. Подождите, пока ваш профиль будет одобрен администратором.'}, status=status.HTTP_200_OK)

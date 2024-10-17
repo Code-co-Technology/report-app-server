@@ -1,6 +1,14 @@
 from rest_framework import serializers
 
-from report_app.models import ReportsName, Reports
+from report_app.models import ReportsName, Reports, RespostComment
+
+
+
+class RepostCommentContractorsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = RespostComment
+        fields = ['id', 'repost', 'comment', 'owner']
 
 
 
@@ -26,11 +34,12 @@ class ResportconstructorSerializer(serializers.ModelSerializer):
 
 
 class ReportsNameConstructorSerializer(serializers.ModelSerializer):
-    resposts = ResportconstructorSerializer(many=True)
+    resposts = ResportconstructorSerializer(many=True, required=False)
+    respost_comment = RepostCommentContractorsSerializer(many=True, required=False)
 
     class Meta:
         model = ReportsName
-        fields = ['id', 'name', 'respost_comment', 'status_contractor', 'resposts', 'constructor', 'create_at']
+        fields = ['id', 'name', 'respost_comment', 'status_user', 'status_contractor', 'resposts', 'constructor', 'create_at']
 
     def create(self, validated_data):
         # resposts ma'lumotlarini validated_data dan ajratib oling
@@ -53,18 +62,55 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         # resposts ma'lumotlarini validated_data'dan ajratish
-        resposts_data = validated_data.pop('resposts')
+        resposts_data = validated_data.pop('resposts', None)
+        comment_data = validated_data.pop('respost_comment', None)
 
         # ReportsName ma'lumotlarini yangilash
         instance.name = validated_data.get('name', instance.name)
-        instance.respost_comment = validated_data.get('respost_comment', instance.respost_comment)
+        instance.status_user = validated_data.get('status_user', instance.status_user)
+        instance.status_contractor = validated_data.get('status_contractor', instance.status_contractor)
         instance.save()
 
-        # Mavjud `resposts` obyektlarini o'chirish
-        instance.resposts.all().delete()
+        if resposts_data:
+            # Mavjud resposts'larni id bo'yicha olamiz
+            existing_resposts = {respost.id: respost for respost in instance.resposts.all()}
+    
+            for respost_data in resposts_data:
+                respost_id = respost_data.get('id', None)  # Har bir respost uchun id olamiz
 
-        # Yangilangan `resposts` obyektlarini yaratish
-        for respost_data in resposts_data:
-            Reports.objects.create(reports_name=instance, **respost_data)
+                if respost_id and respost_id in existing_resposts:
+                    # Agar respost mavjud bo'lsa, uni yangilaymiz
+                    respost = existing_resposts.pop(respost_id)
+                    for attr, value in respost_data.items():
+                        setattr(respost, attr, value)
+                    respost.save()
+                else:
+                    # Agar respost mavjud bo'lmasa, yangi yaratamiz
+                    Reports.objects.create(reports_name=instance, **respost_data)
+
+            # Agar biror eski respost qolsa, uni o'chiramiz
+            for respost in existing_resposts.values():
+                respost.delete()
+
+        if comment_data:
+            # Mavjud resposts'larni id bo'yicha olamiz
+            existing_resposts = {respost.id: respost for respost in instance.respost_comment.all()}
+    
+            for respost_data in resposts_data:
+                respost_id = respost_data.get('id', None)  # Har bir respost uchun id olamiz
+
+                if respost_id and respost_id in existing_resposts:
+                    # Agar respost mavjud bo'lsa, uni yangilaymiz
+                    respost = existing_resposts.pop(respost_id)
+                    for attr, value in respost_data.items():
+                        setattr(respost, attr, value)
+                    respost.save()
+                else:
+                    # Agar respost mavjud bo'lmasa, yangi yaratamiz
+                    RespostComment.objects.create(repost=instance, **respost_data)
+
+            # Agar biror eski respost qolsa, uni o'chiramiz
+            for respost in existing_resposts.values():
+                respost.delete()
 
         return instance

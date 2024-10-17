@@ -38,7 +38,7 @@ class ContractorAddUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone', 'password', 'confirm_password', 'groups']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone', 'password', 'confirm_password', 'company', 'groups']
         extra_kwargs = {'first_name': {'required': True}, 'last_name': {'required': True}}
 
     def validate_password(self, value):
@@ -74,6 +74,7 @@ class ContractorAddUserSerializer(serializers.ModelSerializer):
         create.activate_profile = True
         create.company = self.context.get('company')
         create.groups.set(groups_data)
+        create.save()
         return create
 
 

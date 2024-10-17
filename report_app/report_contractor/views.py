@@ -12,7 +12,7 @@ from utils.permissions import IsContractors
 
 from report_app.models import ReportsName
 from report_app.reports.serializers import ReportsNamesSerializer
-from report_app.report_contractor.serializers import ReportsNameConstructorSerializer
+from report_app.report_contractor.serializers import ReportsNameConstructorSerializer, RepostCommentContractorsSerializer
 
 
 class ContractorReporNewView(APIView):
@@ -27,7 +27,7 @@ class ContractorReporNewView(APIView):
         operation_summary='New report'
     )
     def get(self, request):
-        instances = ReportsName.objects.filter(user__company=request.user.company, status_customer=1).order_by('-id')
+        instances = ReportsName.objects.filter(user__company=request.user.company, status_contractor=1).order_by('-id')
         # Pagination logic
         paginator = self.pagination_class()
         paginated_instances = paginator.paginate_queryset(instances, request)
@@ -117,7 +117,7 @@ class ContractorReportView(APIView):
         responses={200: ReportsNamesSerializer(many=False)}
     )
     def get(self, request, pk):
-        instances = get_object_or_404(ReportsName, constructor=request.user, id=pk)
+        instances = get_object_or_404(ReportsName, id=pk)
         serializer = ReportsNamesSerializer(instances, context={'request':request})
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -142,3 +142,22 @@ class ContractorReportView(APIView):
         report_delete = get_object_or_404(ReportsName, constructor=request.user, id=pk)
         report_delete.delete()
         return Response({"message": "Отчет удален"}, status=status.HTTP_204_NO_CONTENT)
+
+
+
+class ContractorReportsCreateCommentView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsContractors]
+    
+    @swagger_auto_schema(
+        tags=['Report Contractors'],
+        request_body=RepostCommentContractorsSerializer,
+        operation_summary='Comment a report.'
+    )
+    def post(self, request):
+        serializer = RepostCommentContractorsSerializer(data=request.data, context={'constructor':request.user, 'request':request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

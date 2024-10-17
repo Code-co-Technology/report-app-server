@@ -35,16 +35,37 @@ class TypeWork(models.Model):
 
 class ReportsName(models.Model):
     name = models.CharField(max_length=250, verbose_name='Название отчета')
-    constructor_accepted = models.BooleanField(default=False, verbose_name='Принял подрядчики')
-    accepted_customer = models.BooleanField(default=False, verbose_name='Принято сотрудники')
-    expired_customer = models.BooleanField(default=False, verbose_name='Истекший сотрудники/подрядчики')
-    expired_admin = models.BooleanField(default=False, verbose_name='Истекший администратора')
-    STATUS = (
-        (1, 'В обработке'),
-        (2, 'Принят'),
+    STATUS_USER = (
+        (1, 'Отправлено'),
+        (2, 'Принято'),
         (3, 'Отказ'),
+        (4, 'Null'),
     )
-    status = models.IntegerField(choices=STATUS, default=1, verbose_name='Статус администратора')
+    status_user = models.IntegerField(choices=STATUS_USER, default=4, verbose_name='Статус пользователя')
+    STATUS_CONTR = (
+        (1, 'Новый'),
+        (2, 'Отправлено'),
+        (3, 'Принято'),
+        (4, 'Отказ'),
+        (5, 'Null'),
+    )
+    status_contractor = models.IntegerField(choices=STATUS_CONTR, default=5, verbose_name='Статус подрядчики')
+    STATUS_CUSTOMER = (
+        (1, 'Новый'),
+        (2, 'Отправлено'),
+        (3, 'Принято'),
+        (4, 'Отказ'),
+        (5, 'Null'),
+    )
+    status_customer = models.IntegerField(choices=STATUS_CUSTOMER, default=5, verbose_name='Статус сотрудники')
+    STATUS = (
+        (1, 'Новый'),
+        (2, 'В обработке'),
+        (3, 'Принят'),
+        (4, 'Отказ'),
+        (5, 'Null'),
+    )
+    status = models.IntegerField(choices=STATUS, default=5, verbose_name='Статус администратора')
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='user', verbose_name='Пользователь')
     constructor = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='constructor', verbose_name='Подрядчики')
     customer = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='customer', verbose_name='Сотрудники')

@@ -1,11 +1,10 @@
 from rest_framework import serializers
 
-from report_app.reports.serializers import BobSerializers, TypeOfWorkSerializer
-from report_app.models import ReportsName, Reports, RespostComment
+from report_app.models import ReportsName, Reports
 
 
 
-class ResportCreateSerializer(serializers.ModelSerializer):
+class ResportCustomerSerializer(serializers.ModelSerializer):
 
      class Meta:
           model = Reports
@@ -26,12 +25,12 @@ class ResportCreateSerializer(serializers.ModelSerializer):
           ]
 
 
-class ReportsNameCreateSerializer(serializers.ModelSerializer):
-    resposts = ResportCreateSerializer(many=True)
+class ReportsNameCustomerSerializer(serializers.ModelSerializer):
+    resposts = ResportCustomerSerializer(many=True)
 
     class Meta:
         model = ReportsName
-        fields = ['id', 'name', 'respost_comment', 'status_user', 'resposts', 'user', 'create_at']
+        fields = ['id', 'name', 'respost_comment', 'status_customer', 'resposts', 'customer', 'create_at']
 
     def create(self, validated_data):
         # resposts ma'lumotlarini validated_data dan ajratib oling
@@ -41,9 +40,9 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
         reports_name = ReportsName.objects.create(**validated_data)
         
         # Foydalanuvchini context orqali bog'lab qo'shish
-        reports_name.user = self.context.get('user')
-        reports_name.status_user = 1
-        reports_name.status_contractor = 2
+        reports_name.customer = self.context.get('customer')
+        reports_name.status_customer = 2
+        reports_name.status = 1
         reports_name.save()
 
         # Har bir respost uchun alohida Reports obyektlarini yaratish

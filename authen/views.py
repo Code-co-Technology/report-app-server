@@ -27,7 +27,7 @@ from authen.models import CustomUser, Company
 from authen.serializers import (
     UserGroupSerizliers,
     UserSignUpSerializer,
-    UserContractorsRegisterSerializer,
+    UserCustumerRegisterSerializer,
     UserSigInSerializer,
     UserInformationSerializer,
     UserUpdateSerializer,
@@ -68,9 +68,9 @@ class UserSignUp(APIView):
 class UserContractorRegister(APIView):
     render_classes = [UserRenderers]
 
-    @swagger_auto_schema(tags=["Auth"], request_body=UserContractorsRegisterSerializer)
+    @swagger_auto_schema(tags=["Auth"], request_body=UserCustumerRegisterSerializer)
     def post(self, request):
-        serializer = UserContractorsRegisterSerializer(data=request.data)
+        serializer = UserCustumerRegisterSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             instanse = serializer.save()
             return Response({'message': 'Вы зарегистрировались. Подождите, пока ваш профиль будет одобрен администратором. На ваш адрес электронной почты будет отправлено сообщение.'}, status=status.HTTP_200_OK)

@@ -116,13 +116,13 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         
         create = get_user_model().objects.create_user(username=username, company=company, **validated_data)
 
-        groups_data = Group.objects.get(name='customer')
+        groups_data = Group.objects.get(name='contractors')
         create.groups.add(groups_data)
 
         return create
 
 
-class UserContractorsRegisterSerializer(serializers.ModelSerializer):
+class UserCustumerRegisterSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(max_length=50, validators=[
             MaxLengthValidator(limit_value=50, message='Имя не может превышать 50 символов.')],)
     last_name = serializers.CharField(max_length=50, validators=[
@@ -169,7 +169,7 @@ class UserContractorsRegisterSerializer(serializers.ModelSerializer):
 
         create = get_user_model().objects.create_user(username=username, **validated_data)
 
-        groups_data = Group.objects.get(name='contractors')
+        groups_data = Group.objects.get(name='custumer')
         create.groups.add(groups_data)
 
         return create

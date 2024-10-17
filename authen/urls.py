@@ -13,8 +13,8 @@ from authen.views import (
 
 
 urlpatterns = [
-    path('user/customer/register/', UserSignUp.as_view()),
-    path('user/contractor/register', UserContractorRegister.as_view()),
+    path('user/contractor/register/', UserSignUp.as_view()),
+    path('user/customer/register', UserContractorRegister.as_view()),
     path('user/login/', UserSignIn.as_view()),
     path('user/profile/', UserProfile.as_view()),
     path('user/information/<int:pk>/', UserInformationView.as_view()),

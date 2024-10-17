@@ -4,7 +4,7 @@ from report_app.models import ReportsName, Reports, RespostComment
 
 
 
-class RepostCommentContractorsSerializer(serializers.ModelSerializer):
+class RepostCommentAdminSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RespostComment
@@ -12,7 +12,7 @@ class RepostCommentContractorsSerializer(serializers.ModelSerializer):
 
 
 
-class ResportconstructorSerializer(serializers.ModelSerializer):
+class ResportAdminSerializer(serializers.ModelSerializer):
 
      class Meta:
           model = Reports
@@ -33,32 +33,14 @@ class ResportconstructorSerializer(serializers.ModelSerializer):
           ]
 
 
-class ReportsNameConstructorSerializer(serializers.ModelSerializer):
-    resposts = ResportconstructorSerializer(many=True, required=False)
-    respost_comment = RepostCommentContractorsSerializer(many=True, required=False)
+class ReportsNameAdminSerializer(serializers.ModelSerializer):
+    resposts = ResportAdminSerializer(many=True, required=False)
+    respost_comment = RepostCommentAdminSerializer(many=True, required=False)
 
     class Meta:
         model = ReportsName
-        fields = ['id', 'name', 'respost_comment', 'status_user', 'status_contractor', 'status_customer', 'resposts', 'constructor', 'create_at']
+        fields = ['id', 'name', 'respost_comment', 'status_customer', 'status', 'resposts', 'admin', 'create_at']
 
-    def create(self, validated_data):
-        # resposts ma'lumotlarini validated_data dan ajratib oling
-        resposts_data = validated_data.pop('resposts')
-        
-        # ReportsName ni yaratish
-        reports_name = ReportsName.objects.create(**validated_data)
-        
-        # Foydalanuvchini context orqali bog'lab qo'shish
-        reports_name.constructor = self.context.get('constructor')
-        reports_name.status_contractor = 1
-        reports_name.status_customer = 2
-        reports_name.save()
-
-        # Har bir respost uchun alohida Reports obyektlarini yaratish
-        for respost_data in resposts_data:
-            Reports.objects.create(reports_name=reports_name, **respost_data)
-
-        return reports_name
 
     def update(self, instance, validated_data):
         # resposts ma'lumotlarini validated_data'dan ajratish
@@ -68,9 +50,9 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
         # ReportsName ma'lumotlarini yangilash
         instance.name = validated_data.get('name', instance.name)
         instance.status_user = validated_data.get('status_user', instance.status_user)
-        instance.status_contractor = validated_data.get('status_contractor', instance.status_contractor)
-        instance.status_customer = validated_data.get('status_customer', instance.status_customer)
-        instance.constructor = self.context.get('constructor')
+        instance.status_customer = validated_data.get('status_customer', instance.status_contractor)
+        instance.status = validated_data.get('status', instance.status_customer)
+        instance.admin = self.context.get('admin')
         instance.save()
 
         # Resposts'larni yangilash yoki qo'shish
@@ -97,7 +79,7 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
         # Kommentlarni yangilash yoki qo'shish
         if comment_data:
             existing_comments = {comment.id: comment for comment in instance.respost_comment.all()}
-            constructor = self.context.get('constructor')
+            admin = self.context.get('admin')
             for comment_data_item in comment_data:
                 comment_id = comment_data_item.get('id', None)
 
@@ -106,10 +88,10 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
                     comment = existing_comments[comment_id]
                     for attr, value in comment_data_item.items():
                         setattr(comment, attr, value)
-                    comment.owner = constructor
+                    comment.owner = admin
                     comment.save()
                 else:
                     # Agar komment yangi bo'lsa, uni yaratamiz
-                    RespostComment.objects.create(repost=instance, owner=constructor, **comment_data_item)
+                    RespostComment.objects.create(repost=instance, owner=admin, **comment_data_item)
 
         return instance

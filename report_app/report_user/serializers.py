@@ -4,7 +4,11 @@ from report_app.reports.serializers import BobSerializers, TypeOfWorkSerializer
 from report_app.models import ReportsName, Reports, RespostComment
 
 
+class RepostCommentUserSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = RespostComment
+        fields = ['id', 'repost', 'comment', 'owner']
 
 
 class ResportCreateSerializer(serializers.ModelSerializer):
@@ -30,10 +34,11 @@ class ResportCreateSerializer(serializers.ModelSerializer):
 
 class ReportsNameCreateSerializer(serializers.ModelSerializer):
     resposts = ResportCreateSerializer(many=True, required=False)
+    respost_comment = RepostCommentUserSerializer(many=True, required=False)
 
     class Meta:
         model = ReportsName
-        fields = ['id', 'name', 'status_user', 'resposts', 'user', 'create_at']
+        fields = ['id', 'name', 'status_user', 'status_contractor', 'resposts', 'respost_comment', 'user', 'create_at']
 
     def create(self, validated_data):
         # resposts ma'lumotlarini validated_data dan ajratib oling
@@ -57,30 +62,51 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         # resposts ma'lumotlarini validated_data'dan ajratish
         resposts_data = validated_data.pop('resposts', None)
+        comment_data = validated_data.pop('respost_comment', None)
 
         # ReportsName ma'lumotlarini yangilash
         instance.name = validated_data.get('name', instance.name)
+        instance.status_user = validated_data.get('status_user', instance.status_user)
+        instance.status_contractor = validated_data.get('status_contractor', instance.status_contractor)
         instance.save()
-
-        if resposts_data:
-            # Mavjud resposts'larni id bo'yicha olamiz
+        
+        if resposts_data is not None:
             existing_resposts = {respost.id: respost for respost in instance.resposts.all()}
-    
-            for respost_data in resposts_data:
-                respost_id = respost_data.get('id', None)  # Har bir respost uchun id olamiz
+
+            for respost_data_item in resposts_data:
+                respost_id = respost_data_item.get('id', None)
 
                 if respost_id and respost_id in existing_resposts:
                     # Agar respost mavjud bo'lsa, uni yangilaymiz
-                    respost = existing_resposts.pop(respost_id)
-                    for attr, value in respost_data.items():
+                    respost = existing_resposts[respost_id]
+                    
+                    for attr, value in respost_data_item.items():
                         setattr(respost, attr, value)
                     respost.save()
                 else:
-                    # Agar respost mavjud bo'lmasa, yangi yaratamiz
-                    Reports.objects.create(reports_name=instance, **respost_data)
+                    # Agar respost yangi bo'lsa, uni yaratamiz
+                    # Use filter() instead of get_or_create()
+                    new_respost = Reports.objects.filter(reports_name=instance, **respost_data_item).first()
+                    if not new_respost:
+                        Reports.objects.create(reports_name=instance, **respost_data_item)
 
-            # Agar biror eski respost qolsa, uni o'chiramiz
-            for respost in existing_resposts.values():
-                respost.delete()
+        # Kommentlarni yangilash yoki qo'shish
+        if comment_data:
+            existing_comments = {comment.id: comment for comment in instance.respost_comment.all()}
+            user = self.context.get('user')
+
+            for comment_data_item in comment_data:
+                comment_id = comment_data_item.get('id', None)
+
+                if comment_id and comment_id in existing_comments:
+                    # Agar komment mavjud bo'lsa, uni yangilaymiz
+                    comment = existing_comments[comment_id]
+                    for attr, value in comment_data_item.items():
+                        setattr(comment, attr, value)
+                    comment.owner = user
+                    comment.save()
+                else:
+                    # Agar komment yangi bo'lsa, uni yaratamiz
+                    RespostComment.objects.create(repost=instance, owner=user, **comment_data_item)
 
         return instance

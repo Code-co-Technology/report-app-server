@@ -67,7 +67,7 @@ class ContractorReportReturnView(APIView):
         operation_summary='Returned reports'
     )
     def get(self, request):
-        instances = ReportsName.objects.filter(constructor=request.user, status_user=4).order_by('-id')
+        instances = ReportsName.objects.filter(constructor=request.user, status_contractor=4).order_by('-id')
         # Pagination logic
         paginator = self.pagination_class()
         paginated_instances = paginator.paginate_queryset(instances, request)
@@ -128,7 +128,7 @@ class ContractorReportView(APIView):
     def put(self, request, pk):
         instance = get_object_or_404(ReportsName, id=pk)
         # Make sure to check that data is not a list, but a dictionary
-        serializer = ReportsNameConstructorSerializer(instance=instance, data=request.data, context={'request': request}, partial=True)
+        serializer = ReportsNameConstructorSerializer(instance=instance, data=request.data, context={'customer':request.user, 'request': request}, partial=True)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

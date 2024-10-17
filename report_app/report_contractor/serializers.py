@@ -71,46 +71,38 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
         instance.status_contractor = validated_data.get('status_contractor', instance.status_contractor)
         instance.save()
 
+        # Resposts'larni yangilash yoki qo'shish
         if resposts_data:
-            # Mavjud resposts'larni id bo'yicha olamiz
             existing_resposts = {respost.id: respost for respost in instance.resposts.all()}
-    
+
             for respost_data in resposts_data:
-                respost_id = respost_data.get('id', None)  # Har bir respost uchun id olamiz
+                respost_id = respost_data.get('id', None)
 
                 if respost_id and respost_id in existing_resposts:
                     # Agar respost mavjud bo'lsa, uni yangilaymiz
-                    respost = existing_resposts.pop(respost_id)
+                    respost = existing_resposts[respost_id]
                     for attr, value in respost_data.items():
                         setattr(respost, attr, value)
                     respost.save()
                 else:
-                    # Agar respost mavjud bo'lmasa, yangi yaratamiz
+                    # Agar respost yangi bo'lsa, uni yaratamiz
                     Reports.objects.create(reports_name=instance, **respost_data)
 
-            # Agar biror eski respost qolsa, uni o'chiramiz
-            for respost in existing_resposts.values():
-                respost.delete()
-
+        # Kommentlarni yangilash yoki qo'shish
         if comment_data:
-            # Mavjud resposts'larni id bo'yicha olamiz
-            existing_resposts = {respost.id: respost for respost in instance.respost_comment.all()}
-    
-            for respost_data in resposts_data:
-                respost_id = respost_data.get('id', None)  # Har bir respost uchun id olamiz
+            existing_comments = {comment.id: comment for comment in instance.respost_comment.all()}
 
-                if respost_id and respost_id in existing_resposts:
-                    # Agar respost mavjud bo'lsa, uni yangilaymiz
-                    respost = existing_resposts.pop(respost_id)
-                    for attr, value in respost_data.items():
-                        setattr(respost, attr, value)
-                    respost.save()
+            for comment_data_item in comment_data:
+                comment_id = comment_data_item.get('id', None)
+
+                if comment_id and comment_id in existing_comments:
+                    # Agar komment mavjud bo'lsa, uni yangilaymiz
+                    comment = existing_comments[comment_id]
+                    for attr, value in comment_data_item.items():
+                        setattr(comment, attr, value)
+                    comment.save()
                 else:
-                    # Agar respost mavjud bo'lmasa, yangi yaratamiz
-                    RespostComment.objects.create(repost=instance, **respost_data)
-
-            # Agar biror eski respost qolsa, uni o'chiramiz
-            for respost in existing_resposts.values():
-                respost.delete()
+                    # Agar komment yangi bo'lsa, uni yaratamiz
+                    RespostComment.objects.create(repost=instance, **comment_data_item)
 
         return instance

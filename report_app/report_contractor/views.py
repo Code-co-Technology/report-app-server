@@ -126,7 +126,7 @@ class ContractorReportView(APIView):
         request_body=ReportsNameConstructorSerializer,
     )
     def put(self, request, pk):
-        instance = get_object_or_404(ReportsName, constructor=request.user, id=pk)
+        instance = get_object_or_404(ReportsName, id=pk)
         # Make sure to check that data is not a list, but a dictionary
         serializer = ReportsNameConstructorSerializer(instance=instance, data=request.data, context={'request': request}, partial=True)
         if serializer.is_valid(raise_exception=True):

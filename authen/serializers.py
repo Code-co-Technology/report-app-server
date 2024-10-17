@@ -169,7 +169,7 @@ class UserCustumerRegisterSerializer(serializers.ModelSerializer):
 
         create = get_user_model().objects.create_user(username=username, **validated_data)
 
-        groups_data = Group.objects.get(name='custumer')
+        groups_data = Group.objects.get(name='customer')
         create.groups.add(groups_data)
 
         return create

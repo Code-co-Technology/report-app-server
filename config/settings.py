@@ -149,9 +149,9 @@ AUTHENTICATION_BACKENDS = [
 AUTH_USER_MODEL = "authen.CustomUser"
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000"
-    "http://localhost:5174"
-    "http://localhost:5173"
+    "http://localhost:3000",
+    "http://localhost:5174",
+    "http://localhost:5173",
 ]
 
 CORS_ORIGIN_ALLOW_ALL = os.environ.get("CORS_ORIGIN_ALLOW_ALL", "False").lower() in ["true", "1"]

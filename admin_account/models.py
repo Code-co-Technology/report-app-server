@@ -47,7 +47,7 @@ class ProjectImage(models.Model):
 
 class ProjectSmeta(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Проекта', related_name='project_files')
-    files = models.ImageField(upload_to='project_files/', null=True, blank=True, verbose_name='Файл проекта')
+    files = models.FileField(upload_to='project_files/', null=True, blank=True, verbose_name='Файл проекта')
 
     def __str__(self):
         return f'{self.project.address}'

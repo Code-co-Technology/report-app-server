@@ -1,12 +1,5 @@
 from django.db import models
 from authen.models import CustomUser
-from admin_account.models import Project
-
-
-# class Prescription(models.Model):
-#     project = models.ForeignKey(Project, on_delete=models.SET_NULL, verbose_name='')
-#     customer = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, verbose_name='')
-    
 
 
 class Bob(models.Model):

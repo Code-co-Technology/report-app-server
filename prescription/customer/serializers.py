@@ -24,7 +24,7 @@ class PrescriptionsCommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PrescriptionsComment
-        fields = ['id', 'comment', 'onwer']
+        fields = ['id', 'comment', 'owner']
 
 
 class CustomerPrescriptionsSerializers(serializers.ModelSerializer):
@@ -37,4 +37,26 @@ class CustomerPrescriptionsSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Prescriptions
-        fields = ['id', 'project', 'contractor', 'type_violation', 'deadline', 'owner', 'create_at']
+        fields = ['id', 'project', 'contractor', 'type_violation', 'deadline', 'owner', 'prescription_image', 'prescription_comment', 'create_at']
+
+
+class CustomerPrescriptionSerializers(serializers.ModelSerializer):
+    respost_comment = PrescriptionsCommentSerializer(many=True, required=False)
+
+    class Meta:
+        model = Prescriptions
+        fields = ['id', 'project', 'contractor', 'type_violation', 'deadline', 'owner', 'prescription_image', 'prescription_comment', 'create_at']
+
+    def create(self, validated_data):
+        owner = self.context.get('owner')
+
+        if owner.report_processing:
+            raise serializers.ValidationError({"error": "Разрешения на создание предписаний нет."})
+
+
+        prescription_comment = validated_data.pop('prescription_comment', None)
+        
+        # ReportsName ni yaratish
+        reports_name = Prescriptions.objects.create(**validated_data)
+
+        return reports_name

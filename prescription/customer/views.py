@@ -12,7 +12,7 @@ from utils.renderers import UserRenderers
 from utils.permissions import IsCustomer
 
 from admin_account.models import Project
-from admin_account.project import AdminProjectsSerializer
+from admin_account.project.views import AdminProjectsSerializer
 
 from prescription.models import TypeOfViolation, Prescriptions
 from prescription.customer.serializers import TypeOFViolationSerializer, CustomerPrescriptionsSerializers
@@ -60,7 +60,7 @@ class UstumerPrescriptionsView(APIView):
         responses={200: CustomerPrescriptionsSerializers(many=True)}
     )
     def get(self, request):
-        instance = Prescriptions.objects.filter().order_by('-id')
+        instance = Prescriptions.objects.filter(owner=request.user).order_by('-id')
         # Pagination logic
         paginator = self.pagination_class()
         paginated_instances = paginator.paginate_queryset(instance, request)

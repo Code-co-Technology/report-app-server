@@ -9,6 +9,7 @@ from drf_yasg.utils import swagger_auto_schema
 from utils.pagination import PaginationList
 from utils.renderers import UserRenderers
 from utils.permissions import IsAdmin
+from drf_yasg import openapi
 
 from report_app.models import ReportsName
 from report_app.reports.serializers import ReportsNamesSerializer
@@ -24,14 +25,33 @@ class AdminReportsView(APIView):
     @swagger_auto_schema(
         tags=['Report Admin'],
         responses={200: ReportsNamesSerializer(many=True)},
+        manual_parameters=[
+            openapi.Parameter(
+                'status', openapi.IN_QUERY, description="Filter reports by status ID", type=openapi.TYPE_INTEGER    
+            ),
+        ],
         operation_summary='Reports'
     )
     def get(self, request):
-        instances = ReportsName.objects.filter(constructor=request.user, status_contractor=2).order_by('-id')
-        # Pagination logic
+        instances = ReportsName.objects.all().order_by('-id')
+        status = request.query_params.get('status')
+
+        # Agar 'status_customer' qiymati bo'lsa, hisobotlarni shu qiymatga ko'ra filtrlaymiz
+        if status is not None:
+            try:
+                # status_customer ni int ga aylantirish
+                status_customer_id = int(status)
+                instances = instances.filter(status=status_customer_id)
+            except ValueError:
+                return Response({"error": "Invalid status id"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Pagination
         paginator = self.pagination_class()
         paginated_instances = paginator.paginate_queryset(instances, request)
-        serializer = ReportsNamesSerializer(paginated_instances, many=True, context={'request':request})
+        
+        # Serializatsiya
+        serializer = ReportsNamesSerializer(paginated_instances, many=True, context={'request': request})
+        
         return paginator.get_paginated_response(serializer.data)
 
 

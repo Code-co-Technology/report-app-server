@@ -59,6 +59,10 @@ class ReportsNameCustomerSerializer(serializers.ModelSerializer):
         return reports_name
 
     def update(self, instance, validated_data):
+        customer = self.context.get('customer')
+         # Tekshirish: foydalanuvchi hisobot yubora oladimi yoki yo'q
+        if customer.report_processing:
+            raise serializers.ValidationError({"error": "У вас нет разрешения на обработку отчета"})
         # resposts ma'lumotlarini validated_data'dan ajratish
         resposts_data = validated_data.pop('resposts', None)
         comment_data = validated_data.pop('respost_comment', None)

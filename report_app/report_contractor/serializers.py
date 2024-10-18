@@ -42,6 +42,10 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'respost_comment', 'status_user', 'status_contractor', 'status_customer', 'resposts', 'constructor', 'create_at']
 
     def create(self, validated_data):
+        constructor = self.context.get('constructor')
+         # Tekshirish: foydalanuvchi hisobot yubora oladimi yoki yo'q
+        if constructor.block_sending_report:
+            raise serializers.ValidationError({"error": "Вы не можете отправить отчет. Отчет заблокирован."})
         # resposts ma'lumotlarini validated_data dan ajratib oling
         resposts_data = validated_data.pop('resposts')
         
@@ -61,6 +65,10 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
         return reports_name
 
     def update(self, instance, validated_data):
+        constructor = self.context.get('constructor')
+        if constructor.block_sending_report:
+            raise serializers.ValidationError({"error": "Вы не можете отправить отчет. Отчет заблокирован."})
+
         # resposts ma'lumotlarini validated_data'dan ajratish
         resposts_data = validated_data.pop('resposts', None)
         comment_data = validated_data.pop('respost_comment', None)

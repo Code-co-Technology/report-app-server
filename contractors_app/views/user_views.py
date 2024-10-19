@@ -32,7 +32,7 @@ class ContractorUserGroupView(APIView):
         operation_description='All roles are for Contractor.'
     )
     def get(self, request):
-        group = Group.objects.filter(groups__name__in=['user'])
+        group = Group.objects.filter(name__in=['user'])
         serializer = ContractorGorupsUserSerializer(group, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

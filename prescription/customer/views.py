@@ -15,7 +15,7 @@ from admin_account.models import Project
 from admin_account.project.views import AdminProjectsSerializer
 
 from prescription.models import TypeOfViolation, Prescriptions
-from prescription.customer.serializers import TypeOFViolationSerializer, CustomerPrescriptionsSerializers
+from prescription.customer.serializers import TypeOFViolationSerializer, CustomerPrescriptionsSerializers, CustomerPrescriptionSerializers
 
 
 class CustomerProjectView(APIView):
@@ -66,3 +66,15 @@ class UstumerPrescriptionsView(APIView):
         paginated_instances = paginator.paginate_queryset(instance, request)
         serializer = CustomerPrescriptionsSerializers(paginated_instances, many=True, context={'request':request})
         return paginator.get_paginated_response(serializer.data)
+
+    @swagger_auto_schema(
+        tags=['Prescription Customer'],
+        request_body=CustomerPrescriptionSerializers,
+        operation_summary='Submit a prescription.'
+    )
+    def post(self, request):
+        serializer = CustomerPrescriptionSerializers(data=request.data, context={'owner':request.user, 'request':request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

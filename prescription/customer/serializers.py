@@ -41,7 +41,9 @@ class CustomerPrescriptionsSerializers(serializers.ModelSerializer):
 
 
 class CustomerPrescriptionSerializers(serializers.ModelSerializer):
-    respost_comment = PrescriptionsCommentSerializer(many=True, required=False)
+    prescription_image = serializers.ListField(child = serializers.ImageField(max_length = 1000000, allow_empty_file = False, use_url = False),
+        write_only=True, required=False)
+    prescription_comment = PrescriptionsCommentSerializer(many=True, required=False)
 
     class Meta:
         model = Prescriptions
@@ -53,10 +55,18 @@ class CustomerPrescriptionSerializers(serializers.ModelSerializer):
         if owner.report_processing:
             raise serializers.ValidationError({"error": "Разрешения на создание предписаний нет."})
 
-
         prescription_comment = validated_data.pop('prescription_comment', None)
-        
-        # ReportsName ni yaratish
-        reports_name = Prescriptions.objects.create(**validated_data)
+        images_data = validated_data.pop('prescription_image', [])
 
-        return reports_name
+        respost = Prescriptions.objects.create(**validated_data)
+        respost.owner = owner
+        respost.save()
+
+        # Comment create
+        for respost_data in prescription_comment:
+            PrescriptionsComment.objects.create(prescription=respost, owner=owner, **respost_data)
+        
+        for image_data in images_data:
+            PrescriptionsImage.objects.create(prescription=respost, image=image_data)
+
+        return respost

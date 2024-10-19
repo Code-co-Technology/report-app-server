@@ -127,7 +127,7 @@ class AdminUpdateProjectSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         # Extracting nested data
         images_data = validated_data.pop('project_image', [])
-        files_data = validated_data.pop('   ', [])
+        files_data = validated_data.pop('project_files', [])
 
         # Handle contractors_data as optional
         contractors_data = validated_data.pop('contractor', None)

@@ -34,12 +34,8 @@ class ResportAdminSerializer(serializers.ModelSerializer):
 
 
 class ReportsNameAdminSerializer(serializers.ModelSerializer):
-    prescription_image = serializers.ListField(child = serializers.ImageField(max_length = 1000000, allow_empty_file = False, use_url = False),
-        write_only=True, required=False)
     resposts = ResportAdminSerializer(many=True, required=False)
     respost_comment = RepostCommentAdminSerializer(many=True, required=False)
-    status_user = serializers.CharField(source='get_status_user_display')
-    status_contractor = serializers.CharField(source='get_status_contractor_display')
     status_customer = serializers.CharField(source='get_status_customer_display')
     status = serializers.CharField(source='get_status_display')
 

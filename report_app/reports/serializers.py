@@ -65,6 +65,9 @@ class ReportsNamesSerializer(serializers.ModelSerializer):
           fields = [
                'id', 
                'name', 
+               'user',
+               'constructor',
+               'customer',
                'respost_comment',
                'resposts',
                'status_user',

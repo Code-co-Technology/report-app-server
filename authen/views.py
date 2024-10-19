@@ -123,9 +123,10 @@ class UserProfile(APIView):
             serializer = UserInformationCustomerSerializer(user, context={"request": request})
 
         elif user.groups.filter(name="contractors").exists():
-            serializer = UserInformationContractorSerializer(user, context={"request": request})
+            serializer = UserInformationCustomerSerializer(user, context={"request": request})
 
-        serializer = UserInformationSerializer(request.user, context={"request": request})
+        elif user.groups.filter(name="user").exists():
+            serializer = UserInformationSerializer(user, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(tags=['Auth'], request_body=UserUpdateSerializer)

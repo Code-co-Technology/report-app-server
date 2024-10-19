@@ -5,7 +5,6 @@ from rest_framework.response import Response
 
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 
 from utils.pagination import PaginationList
 from utils.renderers import UserRenderers
@@ -78,3 +77,40 @@ class UstumerPrescriptionsView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UstumerPrescriptionView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsCustomer]
+
+    @swagger_auto_schema(
+        tags=['Prescription Customer'],
+        responses={200: AdminProjectsSerializer(many=False)},
+    )
+    def get(self, request, pk):
+        instances = get_object_or_404(Prescriptions, id=pk)
+        serializer = AdminProjectsSerializer(instances, context={'request':request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(
+        tags=['Prescription Customer'],
+        request_body=CustomerPrescriptionSerializers
+    )
+    def put(self, request, pk):
+        instance = get_object_or_404(Prescriptions, id=pk)
+        # Make sure to check that data is not a list, but a dictionary
+        serializer = CustomerPrescriptionSerializers(instance=instance, data=request.data, context={'owner':request.user, 'request': request}, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @swagger_auto_schema(
+        tags=['Prescription Customer'],
+        responses={204:  'No Content'}
+    )
+    def delete(self, request, pk):
+        project_delete = Prescriptions.objects.filter(owner=request.user, id=pk)[0]
+        project_delete.delete()
+        return Response({"message": "Проект удален"}, status=status.HTTP_204_NO_CONTENT)

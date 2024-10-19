@@ -21,6 +21,13 @@ class Prescriptions(models.Model):
     contractor = models.ManyToManyField(CustomUser, verbose_name='Подрядчик')
     type_violation = models.ManyToManyField(TypeOfViolation, blank=True, verbose_name='Тип нарушения')
     deadline = models.DateField(verbose_name='Срок устранения')
+    STATUS = (
+        (1, 'В обработке'),
+        (3, 'Устранено'),
+        (4, 'Просрочено'),
+        (5, 'Null'),
+    )
+    status = models.IntegerField(choices=STATUS, default=1, verbose_name='Статус')
     owner = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='owner', verbose_name='Владелец')
     create_at = models.DateTimeField(auto_now_add=True)
 

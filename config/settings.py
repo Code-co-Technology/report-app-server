@@ -165,6 +165,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5174",
     "http://localhost:5173",
+    "http://denisz5l.beget.tech",
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True

@@ -32,7 +32,7 @@ class PrescriptionsCommentSerializer(serializers.ModelSerializer):
 class CustomerPrescriptionsSerializers(serializers.ModelSerializer):
     project = AdminProjectsSerializer(read_only=True)
     owner = UserInformationCustomerSerializer(read_only=True)
-    contractor = UserInformationContractorSerializer(many=True)
+    contractor = UserInformationContractorSerializer(read_only=True)
     type_violation = TypeOFViolationSerializer(many=True)
     prescription_image = PrescriptionsImageSerializer(many=True)
     prescription_comment = PrescriptionsCommentSerializer(many=True)

@@ -16,7 +16,7 @@ from prescription.models import Prescriptions
 from prescription.customer.serializers import CustomerPrescriptionsSerializers
 from prescription.admin_acc.serializers import AdminPrescriptionSerializers
 
-
+from django.utils import timezone
 class AdminPrescriptionsView(APIView):
     render_classes = [UserRenderers]
     authentication_classes = [JWTAuthentication]
@@ -29,6 +29,8 @@ class AdminPrescriptionsView(APIView):
     )
     def get(self, request):
         instance = Prescriptions.objects.all().order_by('-id')
+        current_date = timezone.now().date()
+        print(current_date)
         # Pagination logic
         paginator = self.pagination_class()
         paginated_instances = paginator.paginate_queryset(instance, request)

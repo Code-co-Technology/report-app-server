@@ -12,5 +12,5 @@ def check_deadline(sender, instance, **kwargs):
     # Agar deadline o'tgan bo'lsa va status hali 'Просрочено' bo'lmasa
     if instance.deadline < current_date and instance.status != 4:
         instance.status = 4  # 'Просрочено'
-        instance.save()
-
+        # status ni saqlash uchun `update_fields`dan foydalaning
+        instance.save(update_fields=['status'])

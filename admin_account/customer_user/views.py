@@ -26,7 +26,7 @@ class AdminCustumerCountUsersView(APIView):
         responses={200: AdminCustumerUserSerializer(many=True)},
     )
     def get(self, request):
-        instances = CustomUser.objects.filter(activate_profile=True, groups__name__in=['customer']).count()
+        instances = CustomUser.objects.filter(activate_profile=False, groups__name__in=['customer']).count()
         return Response(instances, status=status.HTTP_200_OK)
 
 

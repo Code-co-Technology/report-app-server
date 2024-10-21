@@ -25,7 +25,7 @@ class AdminContraCountUsersView(APIView):
         responses={200: AdminContractorUserSerializer(many=True)},
     )
     def get(self, request):
-        instances = CustomUser.objects.filter(activate_profile=True, groups__name__in=['contractors']).count()
+        instances = CustomUser.objects.filter(activate_profile=False, groups__name__in=['contractors']).count()
         return Response(instances, status=status.HTTP_200_OK)
 
 

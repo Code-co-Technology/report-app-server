@@ -3,6 +3,7 @@ from django.contrib.auth.models import Group
 
 from authen.models import CustomUser, Company, Overdue, FailedReports
 from report_app.models import ReportsName
+from prescription.models import Prescriptions
 
 
 class AdminUserGroupSerializer(serializers.ModelSerializer):
@@ -39,6 +40,7 @@ class AdminContractorUserSerializer(serializers.ModelSerializer):
     overdue = AdminOverdueSerializer(read_only=True)
     failed_reports = AdminFailedReportsSerializer(read_only=True)
     last_report_date = serializers.SerializerMethodField()
+    last_project = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
@@ -58,6 +60,7 @@ class AdminContractorUserSerializer(serializers.ModelSerializer):
             'block_contractor',
             'block_sending_report',
             'last_report_date',
+            'last_project',
         ]
     
     def get_last_report_date(self, obj):
@@ -65,6 +68,13 @@ class AdminContractorUserSerializer(serializers.ModelSerializer):
         last_report = ReportsName.objects.filter(constructor=obj).order_by('-create_at').first()
         if last_report:
             return last_report.create_at
+        return None
+
+    def get_last_project(self, obj):
+        # Foydalanuvchiga tegishli oxirgi loyihani olish
+        last_project = Prescriptions.objects.filter(contractor=obj).order_by('-create_at').first()
+        if last_project:
+            return last_project.project.address  # loyihaning nomini qaytarish
         return None
 
 

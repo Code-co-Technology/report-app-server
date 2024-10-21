@@ -43,11 +43,11 @@ class AdminPrescriptionView(APIView):
 
     @swagger_auto_schema(
         tags=['Prescription Admin'],
-        responses={200: AdminProjectsSerializer(many=False)},
+        responses={200: CustomerPrescriptionsSerializers(many=False)},
     )
     def get(self, request, pk):
         instances = get_object_or_404(Prescriptions, id=pk)
-        serializer = AdminProjectsSerializer(instances, context={'request':request})
+        serializer = CustomerPrescriptionsSerializers(instances, context={'request':request})
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     @swagger_auto_schema(

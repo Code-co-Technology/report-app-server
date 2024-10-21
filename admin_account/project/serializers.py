@@ -2,9 +2,9 @@ import json
 from rest_framework import serializers
 
 from admin_account.models import ProjectStatus, Project, ProjectImage, ProjectSmeta
-from authen.serializers import UserInformationContractorSerializer
+from authen.serializers import UserInformationContractorSerializer, UserInformationCustomerSerializer
 from authen.models import CustomUser
-
+from prescription.models import Prescriptions
 
 class ProjectStatusSerializer(serializers.ModelSerializer):
 
@@ -27,15 +27,26 @@ class AdminProjectFilesSerializer(serializers.ModelSerializer):
         fields = ['id', 'files']
 
 
+class CustomerPrescriptionsProjectSerializers(serializers.ModelSerializer):
+    owner = UserInformationCustomerSerializer(read_only=True)
+    contractor = UserInformationContractorSerializer(read_only=True)
+    status = serializers.CharField(source='get_status_display')
+
+    class Meta:
+        model = Prescriptions
+        fields = ['id', 'status', 'contractor', 'type_violation', 'deadline', 'owner', 'prescription_image', 'prescription_comment', 'create_at']
+
+
 class AdminProjectsSerializer(serializers.ModelSerializer):
     project_image = AdminProjectImagesSerializer(many=True, read_only=True)
     project_files = AdminProjectFilesSerializer(many=True, read_only=True)
     contractor = UserInformationContractorSerializer(many=True)
+    project_prescription = CustomerPrescriptionsProjectSerializers(many=True)
     status = ProjectStatusSerializer(read_only=True)
 
     class Meta:
         model = Project
-        fields = ['id', 'address', 'opening_date', 'submission_deadline', 'contractor', 'status', 'project_image', 'project_files']
+        fields = ['id', 'address', 'opening_date', 'submission_deadline', 'contractor', 'status', 'project_image', 'project_files', 'project_prescription']
 
 
 class AdminCreateProjectSerializer(serializers.ModelSerializer):

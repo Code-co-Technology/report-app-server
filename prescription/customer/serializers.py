@@ -29,6 +29,7 @@ class PrescriptionsCommentSerializer(serializers.ModelSerializer):
         fields = ['id', 'comment', 'owner']
 
 
+
 class CustomerPrescriptionsSerializers(serializers.ModelSerializer):
     project = AdminProjectsSerializer(read_only=True)
     owner = UserInformationCustomerSerializer(read_only=True)

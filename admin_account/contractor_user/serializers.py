@@ -72,7 +72,7 @@ class AdminContractorUserSerializer(serializers.ModelSerializer):
 
     def get_last_project(self, obj):
         # Foydalanuvchiga tegishli oxirgi loyihani olish
-        last_project = Prescriptions.objects.filter(contractor=obj).order_by('-create_at').first()
+        last_project = Prescriptions.objects.filter(contractors=obj).order_by('-create_at').first()
         if last_project:
             return last_project.project.address  # loyihaning nomini qaytarish
         return None

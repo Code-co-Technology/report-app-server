@@ -98,10 +98,7 @@ class ContractorsPrescriptionsView(APIView):
         responses={200: CustomerPrescriptionsSerializers(many=True)}
     )
     def get(self, request):
-        instance = Prescriptions.objects.filter(contractor=request.user)\
-                                        .select_related('project', 'owner')\
-                                        .prefetch_related('type_violation')\
-                                        .order_by('-id')
+        instance = Prescriptions.objects.filter(contractors=request.user).order_by('-id')
         # Pagination logic
         paginator = self.pagination_class()
         paginated_instances = paginator.paginate_queryset(instance, request)

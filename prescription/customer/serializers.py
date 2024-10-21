@@ -48,7 +48,6 @@ class CustomerPrescriptionSerializers(serializers.ModelSerializer):
         write_only=True, required=False)
     prescription_comment = serializers.ListField(child = serializers.CharField(max_length = 1000000),
         write_only=True, required=False)
-    contractor = serializers.CharField(write_only=True, required=False)
     type_violation = serializers.CharField(write_only=True, required=False)
 
     class Meta:
@@ -65,20 +64,11 @@ class CustomerPrescriptionSerializers(serializers.ModelSerializer):
         prescription_comment = validated_data.pop('prescription_comment', [])
         images_data = validated_data.pop('prescription_image', [])
 
-        # Handle contractors and violations (JSON fields)
-        contractors_data = json.loads(validated_data.pop('contractor', '[]'))
         type_violation_data = json.loads(validated_data.pop('type_violation', '[]'))
 
         # Create the prescription object
         prescription = Prescriptions.objects.create(**validated_data)
         prescription.owner = owner
-
-        # Set valid contractors
-        if contractors_data:
-            valid_contractors = CustomUser.objects.filter(id__in=contractors_data)
-            if len(valid_contractors) != len(contractors_data):
-                raise serializers.ValidationError('Some contractor IDs are invalid.')
-            prescription.contractor.set(valid_contractors)
 
         # Set valid type violations
         if type_violation_data:
@@ -110,24 +100,7 @@ class CustomerPrescriptionSerializers(serializers.ModelSerializer):
         # Update instance fields
         instance.project = validated_data.get('project', instance.project)
         instance.deadline = validated_data.get('deadline', instance.deadline)
-
-        # Handle contractors_data as optional
-        contractors_data = validated_data.pop('contractor', None)
-        if contractors_data:
-            contractors_data = json.loads(contractors_data)
-
-        # Process contractors only if provided
-        if contractors_data:
-            valid_contractors = []
-            for contractor_id in contractors_data:
-                try:
-                    version_obj = CustomUser.objects.get(id=contractor_id)
-                    valid_contractors.append(version_obj)  # Collect valid contractor objects
-                except CustomUser.DoesNotExist:
-                    raise serializers.ValidationError(f'Contractor with id {contractor_id} does not exist.')
-
-            # Update contractors
-            instance.contractor.set(valid_contractors)
+        instance.contractor = validated_data.get('contractor', instance.contractor)
         
 
         type_violation_data = validated_data.pop('type_violation', None)

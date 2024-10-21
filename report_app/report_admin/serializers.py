@@ -53,7 +53,7 @@ class ReportsNameAdminSerializer(serializers.ModelSerializer):
         instance.name = validated_data.get('name', instance.name)
         instance.status_user = validated_data.get('status_user', instance.status_user)
         instance.status_customer = validated_data.get('status_customer', instance.status_contractor)
-        instance.status = validated_data.get('status', instance.status_customer)
+        instance.status = validated_data.get('status', instance.status)
         instance.admin = self.context.get('admin')
         instance.save()
 

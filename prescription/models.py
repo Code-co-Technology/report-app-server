@@ -18,9 +18,11 @@ class TypeOfViolation(models.Model):
 
 class Prescriptions(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name='Проект')
-    contractor = models.ManyToManyField(CustomUser, verbose_name='Подрядчик')
+    contractor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Подрядчик')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True, related_name='assistant', verbose_name='Выбрать сотрудника')
     type_violation = models.ManyToManyField(TypeOfViolation, blank=True, verbose_name='Тип нарушения')
     deadline = models.DateField(verbose_name='Срок устранения')
+    user = models.ForeignKey
     STATUS = (
         (1, 'В обработке'),
         (3, 'Устранено'),

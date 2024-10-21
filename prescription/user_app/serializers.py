@@ -3,7 +3,7 @@ from rest_framework import serializers
 from prescription.models import Prescriptions, PrescriptionsComment
 
 
-class ContractorsPrescriptionSerializers(serializers.ModelSerializer):
+class UserPrescriptionSerializers(serializers.ModelSerializer):
     prescription_comment = serializers.ListField(
         child = serializers.CharField(max_length = 1000000),
         write_only=True, required=False
@@ -11,13 +11,10 @@ class ContractorsPrescriptionSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Prescriptions
-        fields = ['id', 'user', 'prescription_comment']
+        fields = ['id', 'prescription_comment']
     
     def update(self, instance, validated_data):
         prescription_comment = validated_data.pop('prescription_comment', None)
-        # Update instance fields
-        instance.user = validated_data.get('user', instance.user)
-        instance.save()
 
         if prescription_comment:
             existing_comments = {comment.id: comment for comment in instance.respost_comment.all()}

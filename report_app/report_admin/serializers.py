@@ -36,8 +36,6 @@ class ResportAdminSerializer(serializers.ModelSerializer):
 class ReportsNameAdminSerializer(serializers.ModelSerializer):
     resposts = ResportAdminSerializer(many=True, required=False)
     respost_comment = RepostCommentAdminSerializer(many=True, required=False)
-    status_customer = serializers.CharField(source='get_status_customer_display')
-    status = serializers.CharField(source='get_status_display')
 
     class Meta:
         model = ReportsName

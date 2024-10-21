@@ -14,6 +14,22 @@ from authen.models import CustomUser
 from admin_account.customer_user.serializers import AdminCustumerUserSerializer, AdminCustumerUserUpdateSerializer
 
 
+
+class AdminCustumerCountUsersView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdmin]
+    pagination_class = PaginationList
+
+    @swagger_auto_schema(
+        tags=['Admin Account Custumer User'],
+        responses={200: AdminCustumerUserSerializer(many=True)},
+    )
+    def get(self, request):
+        instances = CustomUser.objects.filter(activate_profile=True, groups__name__in=['customer']).count()
+        return Response(instances, status=status.HTTP_200_OK)
+
+
 class AdminCustumerFalseUsersView(APIView):
     render_classes = [UserRenderers]
     authentication_classes = [JWTAuthentication]

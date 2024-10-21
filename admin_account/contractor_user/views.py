@@ -14,6 +14,19 @@ from authen.models import CustomUser, Overdue, FailedReports
 from admin_account.contractor_user.serializers import AdminOverdueSerializer, AdminFailedReportsSerializer, AdminContractorUserSerializer, AdminContractorUserUpdateSerializer
 
 
+class AdminContraCountUsersView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdmin]
+    pagination_class = PaginationList
+
+    @swagger_auto_schema(
+        tags=['Admin Account Custumer User'],
+        responses={200: AdminContractorUserSerializer(many=True)},
+    )
+    def get(self, request):
+        instances = CustomUser.objects.filter(activate_profile=True, groups__name__in=['contractors']).count()
+        return Response(instances, status=status.HTTP_200_OK)
 
 
 class AdminOverdueView(APIView):

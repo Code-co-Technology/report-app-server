@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import Group
 
 from authen.models import CustomUser, Company, Overdue, FailedReports
+from report_app.models import ReportsName
 
 
 class AdminUserGroupSerializer(serializers.ModelSerializer):
@@ -37,6 +38,7 @@ class AdminContractorUserSerializer(serializers.ModelSerializer):
     company = AdminCompanySerializer(read_only=True)
     overdue = AdminOverdueSerializer(read_only=True)
     failed_reports = AdminFailedReportsSerializer(read_only=True)
+    last_report_date = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
@@ -54,8 +56,16 @@ class AdminContractorUserSerializer(serializers.ModelSerializer):
             'failed_reports',
             'penalty',
             'block_contractor',
-            'block_sending_report'
+            'block_sending_report',
+            'last_report_date',
         ]
+    
+    def get_last_report_date(self, obj):
+        # Foydalanuvchiga tegishli oxirgi hisobotni topish
+        last_report = ReportsName.objects.filter(constructor=obj).order_by('-create_at').first()
+        if last_report:
+            return last_report.create_at
+        return None
 
 
 class AdminContractorUserUpdateSerializer(serializers.ModelSerializer):

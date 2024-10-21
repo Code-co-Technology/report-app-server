@@ -122,8 +122,8 @@ class UserProfile(APIView):
         elif user.groups.filter(name="customer").exists():
             serializer = UserInformationCustomerSerializer(user, context={"request": request})
 
-        elif user.groups.filter(name="contractors").exists():
-            serializer = UserInformationCustomerSerializer(user, context={"request": request})
+        elif user.groups.filter(name="constructor").exists():
+            serializer = UserInformationContractorSerializer(user, context={"request": request})
 
         elif user.groups.filter(name="user").exists():
             serializer = UserInformationSerializer(user, context={"request": request})

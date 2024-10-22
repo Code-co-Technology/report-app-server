@@ -42,9 +42,17 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # resposts ma'lumotlarini validated_data dan ajratib oling
-        resposts_data = json.loads(validated_data.pop('resposts'))
-        # ReportsName ni yaratish
-        reports_name = ReportsName.objects.create(**validated_data)
+        resposts_data = validated_data.pop('resposts', None)
+    
+        if resposts_data:
+            # String bo'lsa, uni JSON ga aylantiramiz
+            if isinstance(resposts_data, str):
+                try:
+                    resposts_data = json.loads(resposts_data)
+                except json.JSONDecodeError:
+                    raise serializers.ValidationError("Invalid JSON format for resposts")
+            # ReportsName ni yaratish
+            reports_name = ReportsName.objects.create(**validated_data)
         
         # Foydalanuvchini context orqali bog'lab qo'shish
         reports_name.user = self.context.get('user')

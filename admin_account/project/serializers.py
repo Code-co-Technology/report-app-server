@@ -20,11 +20,50 @@ class AdminProjectImagesSerializer(serializers.ModelSerializer):
         fields = ['id', 'image']
 
 
+class AdminProjectImageSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(max_length=None, allow_empty_file=False, allow_null=False, use_url=False, required=False,)
+
+    class Meta:
+        model = ProjectImage
+        fields = ['id', 'image']
+    
+
+    def update(self, instance, validated_data):
+        instance.image = validated_data.get('image', instance.image)
+        
+        if instance.image == None:
+            instance.image = self.context.get("image")
+        else:
+            instance.image = validated_data.get("image", instance.image)
+
+        instance.save()
+        return instance
+
+
 class AdminProjectFilesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProjectSmeta
         fields = ['id', 'files']
+
+
+class AdminProjectFileSerializer(serializers.ModelSerializer):
+    files = serializers.FileField(max_length=None, allow_empty_file=False, allow_null=False, use_url=False, required=False,)
+
+    class Meta:
+        model = ProjectSmeta
+        fields = ['id', 'files']
+    
+    def update(self, instance, validated_data):
+        instance.files = validated_data.get('files', instance.files)
+
+        if instance.files == None:
+            instance.files = self.context.get("files")
+        else:
+            instance.files = validated_data.get("files", instance.files)
+
+        instance.save()
+        return instance
 
 
 class CustomerPrescriptionsProjectSerializers(serializers.ModelSerializer):

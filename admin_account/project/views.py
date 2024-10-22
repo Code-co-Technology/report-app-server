@@ -11,8 +11,12 @@ from utils.pagination import PaginationList
 from utils.renderers import UserRenderers
 from utils.permissions import IsAdmin
 
-from admin_account.models import Project, ProjectImage
-from admin_account.project.serializers import AdminProjectsSerializer, AdminCreateProjectSerializer, AdminUpdateProjectSerializer, AdminProjectImagesSerializer
+from admin_account.models import Project, ProjectImage, ProjectSmeta
+from admin_account.project.serializers import (
+    AdminProjectsSerializer, AdminCreateProjectSerializer, AdminUpdateProjectSerializer, 
+    AdminProjectImagesSerializer, AdminProjectImageSerializer,
+    AdminProjectFilesSerializer, AdminProjectFileSerializer
+)
 
 
 class AdminProjectsView(APIView):
@@ -109,9 +113,59 @@ class ProjectImageView(APIView):
     
     @swagger_auto_schema(
         tags=['Admin Account Project'],
+        request_body=AdminProjectImageSerializer
+    )
+    def put(self, request, pk):
+        instance = get_object_or_404(ProjectImage, id=pk)
+        # Make sure to check that data is not a list, but a dictionary
+        serializer = AdminProjectImageSerializer(instance=instance, data=request.data, context={'request': request}, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @swagger_auto_schema(
+        tags=['Admin Account Project'],
         responses={204:  'No Content'}
     )
     def delete(self, request, pk):
         project_delete = get_object_or_404(ProjectImage, id=pk)
         project_delete.delete()
         return Response({"message": "Изображение удален"}, status=status.HTTP_204_NO_CONTENT)
+    
+
+class ProjectFileView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdmin]
+
+    @swagger_auto_schema(
+        tags=['Admin Account Project'],
+        responses={200: AdminProjectFilesSerializer(many=False)}
+    )
+    def get(self, request, pk):
+        instances = get_object_or_404(ProjectSmeta, id=pk)
+        serializer = AdminProjectFilesSerializer(instances, context={'request':request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(
+        tags=['Admin Account Project'],
+        request_body=AdminProjectFileSerializer
+    )
+    def put(self, request, pk):
+        instance = get_object_or_404(ProjectSmeta, id=pk)
+        # Make sure to check that data is not a list, but a dictionary
+        serializer = AdminProjectFileSerializer(instance=instance, data=request.data, context={'request': request}, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @swagger_auto_schema(
+        tags=['Admin Account Project'],
+        responses={204:  'No Content'}
+    )
+    def delete(self, request, pk):
+        project_delete = get_object_or_404(ProjectSmeta, id=pk)
+        project_delete.delete()
+        return Response({"message": "file удален"}, status=status.HTTP_204_NO_CONTENT)

@@ -80,9 +80,9 @@ class Reports(models.Model):
     frame = models.CharField(max_length=250, null=True, blank=True, verbose_name='Корпус')
     floor = models.CharField(max_length=250, null=True, blank=True, verbose_name='Этаж')
     mark = models.CharField(max_length=250, null=True, blank=True, verbose_name='Отметка')
-    axles = models.CharField(max_length=250, verbose_name='Оси')
-    premises = models.CharField(max_length=250, verbose_name='Помещение')
-    completions = models.CharField(max_length=250, verbose_name='Завершения')
+    axles = models.CharField(max_length=250, null=True, blank=True, verbose_name='Оси')
+    premises = models.CharField(max_length=250, null=True, blank=True, verbose_name='Помещение')
+    completions = models.CharField(max_length=250, null=True, blank=True, verbose_name='Завершения')
     files = models.FileField(upload_to='reports_file/', null=True, blank=True, verbose_name='Файл отчетов')
     create_at = models.DateTimeField(auto_now_add=True)
 

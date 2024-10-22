@@ -30,7 +30,7 @@ class CustumerContraCountUsersView(APIView):
         responses={200: UserInformationContractorSerializer(many=True)},
     )
     def get(self, request):
-        instances = CustomUser.objects.filter(activate_profile=False, groups__name__in=['contractors'])
+        instances = CustomUser.objects.filter(activate_profile=True, groups__name__in=['contractors'])
         serializer = UserInformationContractorSerializer(instances, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

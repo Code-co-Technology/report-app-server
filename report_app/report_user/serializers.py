@@ -41,8 +41,8 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # resposts ma'lumotlarini validated_data dan ajratib oling
-        resposts_data = validated_data.pop('resposts')
-        
+        resposts_data = validated_data.pop('resposts', [])
+        print(resposts_data)
         # ReportsName ni yaratish
         reports_name = ReportsName.objects.create(**validated_data)
         

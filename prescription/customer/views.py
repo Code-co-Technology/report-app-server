@@ -69,6 +69,7 @@ class UstumerPrescriptionsView(APIView):
     render_classes = [UserRenderers]
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsCustomer]
+    pagination_class = PaginationList
 
     @swagger_auto_schema(
         tags=['Prescription Customer'],

@@ -10,12 +10,29 @@ from utils.pagination import PaginationList
 from utils.renderers import UserRenderers
 from utils.permissions import IsCustomer
 
+from authen.models import CustomUser
+from authen.serializers import UserInformationContractorSerializer
+
 from admin_account.models import Project
 from admin_account.project.views import AdminProjectsSerializer
 
 from prescription.models import TypeOfViolation, Prescriptions
 from prescription.customer.serializers import TypeOFViolationSerializer, CustomerPrescriptionsSerializers, CustomerPrescriptionSerializers
 
+
+class CustumerContraCountUsersView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsCustomer]
+
+    @swagger_auto_schema(
+        tags=['Prescription Customer'],
+        responses={200: UserInformationContractorSerializer(many=True)},
+    )
+    def get(self, request):
+        instances = CustomUser.objects.filter(activate_profile=False, groups__name__in=['contractors'])
+        serializer = UserInformationContractorSerializer(instances, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class CustomerProjectView(APIView):
     render_classes = [UserRenderers]
@@ -28,7 +45,7 @@ class CustomerProjectView(APIView):
         operation_summary='For Customer Projects'
     )
     def get(self, request):
-        instance = Project.objects.filter(status=False).order_by('-id')
+        instance = Project.objects.all().order_by('-id')
         serializer = AdminProjectsSerializer(instance, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -52,7 +69,6 @@ class UstumerPrescriptionsView(APIView):
     render_classes = [UserRenderers]
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsCustomer]
-    pagination_class = PaginationList
 
     @swagger_auto_schema(
         tags=['Prescription Customer'],

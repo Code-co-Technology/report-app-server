@@ -1,6 +1,7 @@
+import json
 from rest_framework import serializers
 
-from report_app.models import ReportsName, Reports, RespostComment
+from report_app.models import ReportsName, Reports, RespostComment, Bob, TypeWork
 
 
 class RepostCommentUserSerializer(serializers.ModelSerializer):
@@ -32,7 +33,7 @@ class ResportCreateSerializer(serializers.ModelSerializer):
 
 
 class ReportsNameCreateSerializer(serializers.ModelSerializer):
-    resposts = ResportCreateSerializer(many=True, required=False)
+    resposts = serializers.CharField(write_only=True, required=False)
     respost_comment = RepostCommentUserSerializer(many=True, required=False)
 
     class Meta:
@@ -41,8 +42,7 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # resposts ma'lumotlarini validated_data dan ajratib oling
-        resposts_data = validated_data.pop('resposts', [])
-        print(resposts_data)
+        resposts_data = json.loads(validated_data.pop('resposts'))
         # ReportsName ni yaratish
         reports_name = ReportsName.objects.create(**validated_data)
         
@@ -54,6 +54,11 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
 
         # Har bir respost uchun alohida Reports obyektlarini yaratish
         for respost_data in resposts_data:
+            bob_instance = Bob.objects.get(id=respost_data['bob'])
+            respost_data['bob'] = bob_instance
+
+            type_work_instance = TypeWork.objects.get(id=respost_data['type_work'])
+            respost_data['type_work'] = type_work_instance
             Reports.objects.create(reports_name=reports_name, **respost_data)
 
         return reports_name

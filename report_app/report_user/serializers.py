@@ -42,23 +42,29 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'status_user', 'status_contractor', 'resposts', 'respost_comment', 'user', 'create_at']
 
     def create(self, validated_data):
-        # resposts ma'lumotlarini validated_data dan ajratib oling
+        # resposts ma'lumotlarini validated_data dan ajratib olamiz
         resposts_data = json.loads(validated_data.pop('resposts', '[]'))
-        # print(resposts_data)
-            # ReportsName ni yaratish
+
+        # ReportsName ni yaratamiz
         reports_name = ReportsName.objects.create(**validated_data)
         
-        # Foydalanuvchini context orqali bog'lab qo'shish
+        # Foydalanuvchi bilan bog'lash
         reports_name.user = self.context.get('user')
         reports_name.status_user = 1
         reports_name.status_contractor = 1
         reports_name.save()
 
-        # Har bir respost uchun alohida Reports obyektlarini yaratish
-        for respost_data in resposts_data:
+        # Har bir respost uchun Reports obyektlarini yaratamiz
+        for index, respost_data in enumerate(resposts_data):
             bob = get_object_or_404(Bob, id=respost_data.get('bob'))
             type_work = get_object_or_404(TypeWork, id=respost_data.get('type_work'))
-            Reports.objects.create(reports_name=reports_name, bob=bob, type_work=type_work)
+
+            # Fayllarni formdata'dan olish
+            files_field = f'file{index + 1}'  # Fayllarni tartib bo'yicha olish
+            files = self.context['request'].FILES.get(files_field)
+
+            # Reports obyektini yaratamiz
+            Reports.objects.create(reports_name=reports_name, bob=bob, type_work=type_work, files=files)
 
         return reports_name
 

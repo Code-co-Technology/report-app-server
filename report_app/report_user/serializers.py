@@ -1,5 +1,6 @@
 import json
 from rest_framework import serializers
+from django.shortcuts import get_object_or_404
 
 from report_app.models import ReportsName, Reports, RespostComment, Bob, TypeWork
 
@@ -33,7 +34,7 @@ class ResportCreateSerializer(serializers.ModelSerializer):
 
 
 class ReportsNameCreateSerializer(serializers.ModelSerializer):
-    resposts = ResportCreateSerializer(many=True, required=False)
+    resposts = serializers.CharField(write_only=True)
     respost_comment = RepostCommentUserSerializer(many=True, required=False)
 
     class Meta:
@@ -42,8 +43,8 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # resposts ma'lumotlarini validated_data dan ajratib oling
-        resposts_data = validated_data.pop('resposts', [])
-        print(resposts_data)
+        resposts_data = json.loads(validated_data.pop('resposts', '[]'))
+        # print(resposts_data)
             # ReportsName ni yaratish
         reports_name = ReportsName.objects.create(**validated_data)
         
@@ -55,18 +56,9 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
 
         # Har bir respost uchun alohida Reports obyektlarini yaratish
         for respost_data in resposts_data:
-            
-            if isinstance(respost_data, dict):
-                print(respost_data.get('bob'))
-                # Yangi Reports obyektini yaratish
-                Reports.objects.create(
-                    reports_name=reports_name,
-                    bob=respost_data.get('bob'),
-                    type_work=respost_data.get('type_work'),  # Bu yerda image faylini yuklash imkoniyati bo'lishi kerak
-                    # Boshqa kerakli maydonlarni qo'shing
-                )
-            else:
-                print("Invalid respost data:", respost_data)
+            bob = get_object_or_404(Bob, id=respost_data.get('bob'))
+            type_work = get_object_or_404(TypeWork, id=respost_data.get('type_work'))
+            Reports.objects.create(reports_name=reports_name, bob=bob, type_work=type_work)
 
         return reports_name
 

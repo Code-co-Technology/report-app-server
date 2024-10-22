@@ -11,8 +11,8 @@ from utils.pagination import PaginationList
 from utils.renderers import UserRenderers
 from utils.permissions import IsAdmin
 
-from admin_account.models import Project
-from admin_account.project.serializers import AdminProjectsSerializer, AdminCreateProjectSerializer, AdminUpdateProjectSerializer
+from admin_account.models import Project, ProjectImage
+from admin_account.project.serializers import AdminProjectsSerializer, AdminCreateProjectSerializer, AdminUpdateProjectSerializer, AdminProjectImagesSerializer
 
 
 class AdminProjectsView(APIView):
@@ -91,3 +91,27 @@ class AdminProjectView(APIView):
         project_delete = get_object_or_404(Project, id=pk)
         project_delete.delete()
         return Response({"message": "Проект удален"}, status=status.HTTP_204_NO_CONTENT)
+    
+
+class ProjectImageView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdmin]
+
+    @swagger_auto_schema(
+        tags=['Admin Account Project'],
+        responses={200: AdminProjectImagesSerializer(many=False)}
+    )
+    def get(self, request, pk):
+        instances = get_object_or_404(ProjectImage, id=pk)
+        serializer = AdminProjectImagesSerializer(instances, context={'request':request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(
+        tags=['Admin Account Project'],
+        responses={204:  'No Content'}
+    )
+    def delete(self, request, pk):
+        project_delete = get_object_or_404(ProjectImage, id=pk)
+        project_delete.delete()
+        return Response({"message": "Изображение удален"}, status=status.HTTP_204_NO_CONTENT)

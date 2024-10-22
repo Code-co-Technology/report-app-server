@@ -33,7 +33,7 @@ class ResportCreateSerializer(serializers.ModelSerializer):
 
 
 class ReportsNameCreateSerializer(serializers.ModelSerializer):
-    resposts = serializers.CharField(write_only=True, required=False)
+    resposts = ResportCreateSerializer(many=True, required=False)
     respost_comment = RepostCommentUserSerializer(many=True, required=False)
 
     class Meta:
@@ -42,17 +42,10 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # resposts ma'lumotlarini validated_data dan ajratib oling
-        resposts_data = validated_data.pop('resposts', None)
-    
-        if resposts_data:
-            # String bo'lsa, uni JSON ga aylantiramiz
-            if isinstance(resposts_data, str):
-                try:
-                    resposts_data = json.loads(resposts_data)
-                except json.JSONDecodeError:
-                    raise serializers.ValidationError("Invalid JSON format for resposts")
+        resposts_data = validated_data.pop('resposts', [])
+        print(resposts_data)
             # ReportsName ni yaratish
-            reports_name = ReportsName.objects.create(**validated_data)
+        reports_name = ReportsName.objects.create(**validated_data)
         
         # Foydalanuvchini context orqali bog'lab qo'shish
         reports_name.user = self.context.get('user')
@@ -62,12 +55,18 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
 
         # Har bir respost uchun alohida Reports obyektlarini yaratish
         for respost_data in resposts_data:
-            bob_instance = Bob.objects.get(id=respost_data['bob'])
-            respost_data['bob'] = bob_instance
-
-            type_work_instance = TypeWork.objects.get(id=respost_data['type_work'])
-            respost_data['type_work'] = type_work_instance
-            Reports.objects.create(reports_name=reports_name, **respost_data)
+            
+            if isinstance(respost_data, dict):
+                print(respost_data.get('bob'))
+                # Yangi Reports obyektini yaratish
+                Reports.objects.create(
+                    reports_name=reports_name,
+                    bob=respost_data.get('bob'),
+                    type_work=respost_data.get('type_work'),  # Bu yerda image faylini yuklash imkoniyati bo'lishi kerak
+                    # Boshqa kerakli maydonlarni qo'shing
+                )
+            else:
+                print("Invalid respost data:", respost_data)
 
         return reports_name
 

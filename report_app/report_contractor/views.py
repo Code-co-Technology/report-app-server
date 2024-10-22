@@ -11,6 +11,7 @@ from utils.pagination import PaginationList
 from utils.renderers import UserRenderers
 from utils.permissions import IsContractors
 
+from authen.models import Company
 from report_app.models import ReportsName
 from report_app.reports.serializers import ReportsNamesSerializer
 from report_app.report_contractor.serializers import ReportsNameConstructorSerializer, RepostCommentContractorsSerializer
@@ -27,9 +28,26 @@ class ContractorReporCountView(APIView):
         operation_summary='Report Count'
     )
     def get(self, request):
-        instances = ReportsName.objects.filter(user__compnay=request.user.compnay, status_contractor=1).count()
+        instances = ReportsName.objects.filter(user__company=request.user.company, status_contractor=1).count()
+        serializer = ReportsNamesSerializer(instances, many=True, context={'request':request})
+        return Response(instances, status=status.HTTP_200_OK)
+
+
+class ContractorReporNewView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsContractors]
+
+    @swagger_auto_schema(
+        tags=['Report Contractors'],
+        responses={200: ReportsNamesSerializer(many=True)},
+        operation_summary='Report Count'
+    )
+    def get(self, request):
+        instances = ReportsName.objects.filter(user__company=request.user.company, status_contractor=1)
         serializer = ReportsNamesSerializer(instances, many=True, context={'request':request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class ContractorReporSentView(APIView):
     render_classes = [UserRenderers]
@@ -112,6 +130,7 @@ class ContractorReportsView(APIView):
     )
     def get(self, request):
         # Foydalanuvchi uchun filtrlanadigan barcha hisobotlarni olish
+        company = Company.objects.get(id=request.user.company.id)
         instances = ReportsName.objects.filter(constructor=request.user).order_by('-id')
 
         # Query parametrlardan 'status_customer' qiymatini olish

@@ -7,7 +7,7 @@ from report_app.report_user.views import (
 )
 from report_app.report_contractor.views import (
     ContractorReporSentView, ContractorReporReceivedView, ContractorReportReturnView, 
-    ContractorReportsView, ContractorReportView, ContractorReporCountView
+    ContractorReportsView, ContractorReportView, ContractorReporCountView, ContractorReporNewView
 )
 from report_app.report_customer.views import (
     CustomerReporNewView, CustomerReporReceivedView, CustomerReportReturnView, 
@@ -27,6 +27,7 @@ urlpatterns = [
     path('report/user/', UserReportsView.as_view()),
     path('report/user/<int:pk>/', UserReportView.as_view()),
     # Contractor Reports
+    path('report/contractor/new/', ContractorReporNewView.as_view()),
     path('report/contractor/count/', ContractorReporCountView.as_view()),
     path('report/contractor/sent/', ContractorReporSentView.as_view()),
     path('report/contractor/received/', ContractorReporReceivedView.as_view()),

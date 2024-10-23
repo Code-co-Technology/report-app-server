@@ -116,7 +116,6 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
         instance.status_contractor = validated_data.get('status_contractor', instance.status_contractor)
         instance.status_customer = validated_data.get('status_customer', instance.status_customer)
         instance.constructor = self.context.get('constructor')
-        instance.save()
 
         # Resposts'larni yangilash yoki qo'shish
         existing_resposts = {respost.id: respost for respost in instance.resposts.all()}

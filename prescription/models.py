@@ -19,7 +19,7 @@ class TypeOfViolation(models.Model):
 class Prescriptions(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='project_prescription', verbose_name='Проект')
     type_violation = models.ManyToManyField(TypeOfViolation, blank=True, verbose_name='Тип нарушения')
-    deadline = models.DateField(verbose_name='Срок устранения')
+    deadline = models.DateField(null=True, blank=True, verbose_name='Срок устранения')
     user = models.ForeignKey
     STATUS = (
         (1, 'В обработке'),

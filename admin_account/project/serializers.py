@@ -4,7 +4,7 @@ from rest_framework import serializers
 from admin_account.models import ProjectStatus, Project, ProjectImage, ProjectSmeta
 from authen.serializers import UserInformationContractorSerializer, UserInformationCustomerSerializer
 from authen.models import CustomUser
-from prescription.models import Prescriptions
+from prescription.models import Prescriptions, PrescriptionContractor
 
 class ProjectStatusSerializer(serializers.ModelSerializer):
 
@@ -93,10 +93,11 @@ class AdminCreateProjectSerializer(serializers.ModelSerializer):
         write_only=True, required=False) # Optional
     project_files = serializers.ListField(child = serializers.FileField(max_length = 1000000, allow_empty_file = False, use_url = False),
         write_only=True, required=False) # Optional
+    contractor = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Project
-        fields = ['id', 'address', 'opening_date', 'submission_deadline', 'project_image', 'project_files']
+        fields = ['id', 'address', 'opening_date', 'submission_deadline', 'project_image', 'project_files', 'contractor']
         # The list of required fields will automatically have required=True
         extra_kwargs = {
             'address': {'required': True},
@@ -105,26 +106,31 @@ class AdminCreateProjectSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        # Extracting nested data
         images_data = validated_data.pop('project_image', [])
         files_data = validated_data.pop('project_files', [])
 
-        # Handle contractors_data as optional
         contractors_data = validated_data.pop('contractor', [])
         if contractors_data:
             contractors_data = json.loads(contractors_data) 
-    
-        # Get the default status
-        status_project = ProjectStatus.objects.get(name='В работе')
 
-        # Create the project
+        status_project = ProjectStatus.objects.get(name='В обработке')
         project = Project.objects.create(**validated_data)
         project.status = status_project
         project.owner = self.context.get('owner')
-        project.contractor.set(contractors_data)
-
         project.save()
 
+        if contractors_data:
+            presc = Prescriptions.objects.create(
+                project=project,
+                status=1
+            )
+            for contractor_id in contractors_data:
+                contractor = CustomUser.objects.get(id=contractor_id)  # Get the CustomUser instance
+                PrescriptionContractor.objects.create(
+                    prescription=presc,
+                    contractor=contractor,  # Now contractor is a CustomUser instance
+                    status=1  # Default status for contractors
+                )
         # Handle ProjectImage creation
         for image_data in images_data:
             ProjectImage.objects.create(project=project, image=image_data)
@@ -147,11 +153,10 @@ class AdminUpdateProjectSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False
     )  # Optional
-    contractor = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Project
-        fields = ['id', 'address', 'contractor', 'opening_date', 'submission_deadline', 'project_image', 'project_files']
+        fields = ['id', 'address', 'opening_date', 'submission_deadline', 'project_image', 'project_files']
         # The list of required fields will automatically have required=True
         extra_kwargs = {
             'address': {'required': True},

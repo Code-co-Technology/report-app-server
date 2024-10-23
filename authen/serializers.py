@@ -290,31 +290,6 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['id', 'first_name', 'last_name', 'email', 'phone', 'avatar', 'name_company', 'inn_company', 'ogrn', 'yurdik_address', 'logo']
 
-    def validate(self, attrs):
-        email = attrs.get('email')
-        phone = attrs.get('phone')
-        name_company = attrs.get('name_company')
-        inn_company = attrs.get('inn_company')
-        ogrn = attrs.get('ogrn')
-
-        # Check for unique email and phone
-        if email and CustomUser.objects.filter(email=email).exists():
-            raise serializers.ValidationError({'email': 'Электронная почта должна быть уникальной.'})
-        
-        if phone and CustomUser.objects.filter(phone=phone).exists():
-            raise serializers.ValidationError({'phone': 'Телефон должен быть уникальным.'})
-        
-        # Check for unique company fields
-        if name_company and Company.objects.filter(name_company=name_company).exists():
-            raise serializers.ValidationError({'name_company': 'Название компании должно быть уникальным.'})
-
-        if inn_company and Company.objects.filter(inn_company=inn_company).exists():
-            raise serializers.ValidationError({'inn_company': 'ИНН компании должен быть уникальным.'})
-
-        if ogrn and Company.objects.filter(ogrn=ogrn).exists():
-            raise serializers.ValidationError({'ogrn': 'ОГРН компании должен быть уникальным.'})
-
-        return attrs
 
     def update(self, instance, validated_data):
         # Update user fields

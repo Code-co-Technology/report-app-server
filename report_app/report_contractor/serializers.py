@@ -55,9 +55,7 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
         except json.JSONDecodeError:
             resposts_data = []
         reports_name = ReportsName.objects.create(**validated_data)
-        
-        # ReportsName ni yaratish
-        reports_name = ReportsName.objects.create(**validated_data)
+
         
         # Foydalanuvchini context orqali bog'lab qo'shish
         reports_name.constructor = self.context.get('constructor')

@@ -16,6 +16,21 @@ from report_app.reports.serializers import ReportsNamesSerializer
 from report_app.report_contractor.serializers import ReportsNameConstructorSerializer, RepostCommentContractorsSerializer
 
 
+class ContractorReporCountView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsContractors]
+
+    @swagger_auto_schema(
+        tags=['Report Contractors'],
+        responses={200: ReportsNamesSerializer(many=True)},
+        operation_summary='Report Count'
+    )
+    def get(self, request):
+        instances = ReportsName.objects.filter(user__compnay=request.user.compnay, status_contractor=1).count()
+        serializer = ReportsNamesSerializer(instances, many=True, context={'request':request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 class ContractorReporSentView(APIView):
     render_classes = [UserRenderers]
     authentication_classes = [JWTAuthentication]

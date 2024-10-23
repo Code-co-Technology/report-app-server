@@ -18,6 +18,12 @@ class AdminTypeWork(admin.ModelAdmin):
 admin.site.register(TypeWork, AdminTypeWork)
 
 
+class AdminRespost(admin.ModelAdmin):
+    list_display = ['id', 'reports_name']
+
+admin.site.register(Reports, AdminRespost)
+
+
 class LimitInlineCommentFormSet(BaseInlineFormSet):
     def clean(self):
         super().clean()

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from authen.serializers import UserInformationSerializer, UserInformationAdminSerializer, UserInformationContractorSerializer, UserInformationCustomerSerializer
-from report_app.models import Bob, TypeWork, ReportsName, Reports, RespostComment
+from report_app.models import Bob, TypeWork, ReportsName, Reports, RespostComment, ReportFile
 
 
 class BobSerializers(serializers.ModelSerializer):
@@ -17,6 +17,31 @@ class TypeOfWorkSerializer(serializers.ModelSerializer):
           model = TypeWork
           fields = ['id', 'name']
 
+class RepostFileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ReportFile
+        fields = ['id', 'report_file', 'file']
+
+
+class RepostFileUpdateSerializer(serializers.ModelSerializer):
+     file = serializers.FileField(max_length=None, allow_empty_file=False, allow_null=False, use_url=False, required=False,)
+
+     class Meta:
+        model = ReportFile
+        fields = ['id', 'report_file', 'file']
+     
+     def update(self, instance, validated_data):
+        instance.file = validated_data.get('file', instance.files)
+
+        if instance.file == None:
+            instance.file = self.context.get("file")
+        else:
+            instance.file = validated_data.get("file", instance.files)
+
+        instance.save()
+        return instance
+
 
 class ResportsCommentSerializer(serializers.ModelSerializer):
 
@@ -28,6 +53,7 @@ class ResportsCommentSerializer(serializers.ModelSerializer):
 class ResportsSerializer(serializers.ModelSerializer):
      bob = BobSerializers(read_only=True)
      type_work = TypeOfWorkSerializer(read_only=True)
+     report_file = RepostFileSerializer(many=True)
 
      class Meta:
           model = Reports
@@ -43,6 +69,7 @@ class ResportsSerializer(serializers.ModelSerializer):
                'axles',
                'premises',
                'completions',
+               'report_file',
                'create_at'
           ]
 

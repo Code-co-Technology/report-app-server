@@ -87,8 +87,8 @@ class Reports(models.Model):
 
     class Meta:
         db_table = "reports_1"
-        verbose_name = "Отчеты"
-        verbose_name_plural = "Отчеты"
+        verbose_name = "Отчеты информацию"
+        verbose_name_plural = "Отчеты информацию"
 
 
 class ReportFile(models.Model):

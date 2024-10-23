@@ -1,8 +1,18 @@
 from django.urls import path
-from prescription.customer.views import CustomerProjectView, CustomerTypeOfViolationView, UstumerPrescriptionsView, UstumerPrescriptionView, CustumerContraCountUsersView
+from prescription.customer.views import (
+    CustomerProjectView, CustomerTypeOfViolationView,
+    UstumerPrescriptionsView, UstumerPrescriptionView, CustumerContraCountUsersView
+)
 from prescription.admin_acc.views import AdminPrescriptionsView, AdminPrescriptionView
-from prescription.constractor_app.views import ContractorsPrescriptionsView, ContractorsPrescriptionNewView, ContractorsPrescriptioneliminatedView, ContractorsPrescriptioneExpiredView, ContractorsPrescriptionView
-from prescription.user_app.views import UserPrescriptionNewView, UserPrescriptioneliminatedView, UserPrescriptioneExpiredView, UserPrescriptionsView, UserPrescriptionView
+from prescription.constractor_app.views import (
+    ContractorsPrescriptionsView, ContractorsPrescriptionNewView, 
+    ContractorsPrescriptioneliminatedView, ContractorsPrescriptioneExpiredView, 
+    ContractorsPrescriptionView, ContractorsPrescriptionCountView
+)
+from prescription.user_app.views import (
+    UserPrescriptionNewView, UserPrescriptioneliminatedView,
+    UserPrescriptioneExpiredView, UserPrescriptionsView, UserPrescriptionView
+)
 
 
 urlpatterns = [
@@ -16,6 +26,7 @@ urlpatterns = [
     path('prescription/admin/', AdminPrescriptionsView.as_view()),
     path('prescription/admin/<int:pk>/', AdminPrescriptionView.as_view()),
     # Constractor
+    path('prescription/contractor/count/', ContractorsPrescriptionCountView.as_view()),
     path('prescription/contractor/', ContractorsPrescriptionsView.as_view()),
     path('prescription/contractor/<int:pk>/', ContractorsPrescriptionView.as_view()),
     path('prescription/new/contractor/', ContractorsPrescriptionNewView.as_view()),

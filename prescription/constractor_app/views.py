@@ -17,6 +17,20 @@ from prescription.customer.serializers import CustomerPrescriptionsSerializers
 from prescription.constractor_app.serializers import ContractorsPrescriptionSerializers
 
 
+class ContractorsPrescriptionCountView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsContractors]
+
+    @swagger_auto_schema(
+        tags=['Prescription Contractors'],
+        responses={200: CustomerPrescriptionsSerializers(many=True)}
+    )
+    def get(self, request):
+        instance = Prescriptions.objects.filter(contractor=request.user, status=1).count()
+        serializer = CustomerPrescriptionsSerializers(instance, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 class ContractorsPrescriptionNewView(APIView):
     render_classes = [UserRenderers]
     authentication_classes = [JWTAuthentication]
@@ -103,11 +117,11 @@ class ContractorsPrescriptionView(APIView):
 
     @swagger_auto_schema(
         tags=['Prescription Contractors'],
-        responses={200: AdminProjectsSerializer(many=False)},
+        responses={200: CustomerPrescriptionsSerializers(many=False)},
     )
     def get(self, request, pk):
         instances = get_object_or_404(Prescriptions, id=pk)
-        serializer = AdminProjectsSerializer(instances, context={'request':request})
+        serializer = CustomerPrescriptionsSerializers(instances, context={'request':request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(

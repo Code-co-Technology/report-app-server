@@ -2,7 +2,7 @@ from django.urls import path
 
 from report_app.reports.views import BobView, TypeOfWorkView
 from report_app.report_user.views import UserReportReceivedView, UserReportReturnView, UserReportsView, UserReportView
-from report_app.report_contractor.views import ContractorReporSentView, ContractorReporReceivedView, ContractorReportReturnView, ContractorReportsView, ContractorReportView
+from report_app.report_contractor.views import ContractorReporSentView, ContractorReporReceivedView, ContractorReportReturnView, ContractorReportsView, ContractorReportView, ContractorReporCountView
 from report_app.report_customer.views import CustomerReporNewView, CustomerReporReceivedView, CustomerReportReturnView, CustomerReportsView, CustomerReportView
 from report_app.report_admin.views import AdminReportsView, AdminReportView
 
@@ -17,6 +17,7 @@ urlpatterns = [
     path('report/user/', UserReportsView.as_view()),
     path('report/user/<int:pk>/', UserReportView.as_view()),
     # Contractor Reports
+    path('report/contractor/count/', ContractorReporCountView.as_view()),
     path('report/contractor/sent/', ContractorReporSentView.as_view()),
     path('report/contractor/received/', ContractorReporReceivedView.as_view()),
     path('report/contractor/returned/', ContractorReportReturnView.as_view()),

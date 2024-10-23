@@ -1,5 +1,6 @@
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.parsers import MultiPartParser, JSONParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -59,6 +60,7 @@ class UserReportsView(APIView):
     render_classes = [UserRenderers]
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsUser]
+    parser_classes = (MultiPartParser, JSONParser)
     pagination_class = PaginationList
 
     @swagger_auto_schema(
@@ -66,7 +68,7 @@ class UserReportsView(APIView):
         responses={200: ReportsNamesSerializer(many=True)},
         operation_summary='Submitted reports'
     )
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         instances = ReportsName.objects.filter(user=request.user.id, status_user=1).order_by('-id')
         # Pagination logic
         paginator = self.pagination_class()

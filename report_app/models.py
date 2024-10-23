@@ -83,13 +83,22 @@ class Reports(models.Model):
     axles = models.CharField(max_length=250, null=True, blank=True, verbose_name='Оси')
     premises = models.CharField(max_length=250, null=True, blank=True, verbose_name='Помещение')
     completions = models.CharField(max_length=250, null=True, blank=True, verbose_name='Завершения')
-    files = models.FileField(upload_to='reports_file/', null=True, blank=True, verbose_name='Файл отчетов')
     create_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "reports_1"
         verbose_name = "Отчеты"
         verbose_name_plural = "Отчеты"
+
+
+class ReportFile(models.Model):
+    report_file = models.ForeignKey(Reports, on_delete=models.CASCADE, null=True, blank=True, related_name='report_file', verbose_name='Отчеты')
+    file = models.FileField(upload_to='report_file/', null=True, blank=True, verbose_name='Файлы отчетов')
+
+    class Meta:
+        db_table = "reports_file"
+        verbose_name = "Файлы отчетов"
+        verbose_name_plural = "Файлы отчетов"
 
 
 class RespostComment(models.Model):

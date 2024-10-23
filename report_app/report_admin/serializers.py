@@ -28,7 +28,6 @@ class ResportAdminSerializer(serializers.ModelSerializer):
                'axles',
                'premises',
                'completions',
-               'files',
                'create_at'
           ]
 

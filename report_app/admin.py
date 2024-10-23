@@ -1,8 +1,10 @@
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.forms.models import BaseInlineFormSet
-from report_app.models import Bob, TypeWork, Reports, RespostComment, ReportsName
+from report_app.models import Bob, TypeWork, Reports, RespostComment, ReportsName, ReportFile
 
+
+admin.site.register(ReportFile)
 
 class AdminRespostBob(admin.ModelAdmin):
     list_display = ['id', 'name']

@@ -17,7 +17,6 @@ class AdminPrescriptionSerializers(serializers.ModelSerializer):
         prescription_comment = validated_data.pop('prescription_comment', None)
         # Update instance fields
         instance.status = validated_data.get('status', instance.status)
-        instance.save()
 
         if prescription_comment:
             existing_comments = {comment.id: comment for comment in instance.respost_comment.all()}

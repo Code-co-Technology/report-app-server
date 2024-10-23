@@ -2,7 +2,7 @@ import json
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 
-from report_app.models import ReportsName, Reports, RespostComment, Bob, TypeWork
+from report_app.models import ReportsName, Reports, RespostComment, Bob, TypeWork, ReportFile
 
 
 class RepostCommentUserSerializer(serializers.ModelSerializer):
@@ -10,6 +10,13 @@ class RepostCommentUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = RespostComment
         fields = ['id', 'repost', 'comment', 'owner']
+
+
+class RepostFileUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ReportFile
+        fields = ['id', 'report_file', 'file']
 
 
 class ResportCreateSerializer(serializers.ModelSerializer):
@@ -28,13 +35,12 @@ class ResportCreateSerializer(serializers.ModelSerializer):
                'axles',
                'premises',
                'completions',
-               'files',
                'create_at'
           ]
 
 
 class ReportsNameCreateSerializer(serializers.ModelSerializer):
-    resposts = serializers.CharField(write_only=True)
+    resposts = ResportCreateSerializer(many=True, required=False)
     respost_comment = RepostCommentUserSerializer(many=True, required=False)
 
     class Meta:
@@ -43,9 +49,9 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # resposts ma'lumotlarini validated_data dan ajratib olamiz
-        resposts_data = json.loads(validated_data.pop('resposts', '[]'))
-
-        # ReportsName ni yaratamiz
+        resposts_data = validated_data.pop('resposts', [])
+        print(resposts_data)
+        # # ReportsName ni yaratamiz
         reports_name = ReportsName.objects.create(**validated_data)
         
         # Foydalanuvchi bilan bog'lash
@@ -54,17 +60,9 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
         reports_name.status_contractor = 1
         reports_name.save()
 
-        # Har bir respost uchun Reports obyektlarini yaratamiz
-        for index, respost_data in enumerate(resposts_data):
-            bob = get_object_or_404(Bob, id=respost_data.get('bob'))
-            type_work = get_object_or_404(TypeWork, id=respost_data.get('type_work'))
-
-            # Fayllarni formdata'dan olish
-            files_field = f'file{index + 1}'  # Fayllarni tartib bo'yicha olish
-            files = self.context['request'].FILES.get(files_field)
-
-            # Reports obyektini yaratamiz
-            Reports.objects.create(reports_name=reports_name, bob=bob, type_work=type_work, files=files)
+        # # Har bir respost uchun Reports obyektlarini yaratamiz
+        for respost_data in resposts_data:
+            Reports.objects.create(reports_name=reports_name, **respost_data)
 
         return reports_name
 

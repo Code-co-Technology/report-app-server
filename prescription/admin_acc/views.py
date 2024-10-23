@@ -57,7 +57,7 @@ class AdminPrescriptionView(APIView):
         request_body=AdminPrescriptionSerializers
     )
     def put(self, request, pk):
-        instance = get_object_or_404(Prescriptions, id=pk)
+        instance = Prescriptions.objects.filter(id=pk)[0]
         # Make sure to check that data is not a list, but a dictionary
         serializer = AdminPrescriptionSerializers(instance=instance, data=request.data, context={'owner':request.user, 'request': request}, partial=True)
         if serializer.is_valid(raise_exception=True):

@@ -44,6 +44,7 @@ class RepostFileUpdateSerializer(serializers.ModelSerializer):
 
 
 class ResportsCommentSerializer(serializers.ModelSerializer):
+     owner = UserInformationSerializer(read_only=True)
 
      class Meta:
           model = RespostComment

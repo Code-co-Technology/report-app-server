@@ -46,9 +46,7 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         constructor = self.context.get('constructor')
-         # Tekshirish: foydalanuvchi hisobot yubora oladimi yoki yo'q
-        if constructor.block_sending_report:
-            raise serializers.ValidationError({"error": "Вы не можете отправить отчет. Отчет заблокирован."})
+
         # resposts ma'lumotlarini validated_data dan ajratib oling
         respost_image = validated_data.pop('report_file', [])
         resposts_data = self.initial_data.get('resposts', '[]')

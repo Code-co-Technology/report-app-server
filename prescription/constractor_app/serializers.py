@@ -11,12 +11,11 @@ class ContractorsPrescriptionSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Prescriptions
-        fields = ['id', 'user', 'prescription_comment']
+        fields = ['id', 'prescription_comment']
     
     def update(self, instance, validated_data):
         prescription_comment = validated_data.pop('prescription_comment', None)
         # Update instance fields
-        instance.user = validated_data.get('user', instance.user)
         instance.save()
 
         if prescription_comment:

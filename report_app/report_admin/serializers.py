@@ -33,17 +33,15 @@ class ResportAdminSerializer(serializers.ModelSerializer):
 
 
 class ReportsNameAdminSerializer(serializers.ModelSerializer):
-    resposts = ResportAdminSerializer(many=True, required=False)
     respost_comment = RepostCommentAdminSerializer(many=True, required=False)
 
     class Meta:
         model = ReportsName
-        fields = ['id', 'name', 'respost_comment', 'status_customer', 'status', 'resposts', 'admin', 'create_at']
+        fields = ['id', 'name', 'respost_comment', 'status_customer', 'status', 'admin', 'create_at']
 
 
     def update(self, instance, validated_data):
         # resposts ma'lumotlarini validated_data'dan ajratish
-        resposts_data = validated_data.pop('resposts', None)
         comment_data = validated_data.pop('respost_comment', None)
 
         # ReportsName ma'lumotlarini yangilash
@@ -53,27 +51,6 @@ class ReportsNameAdminSerializer(serializers.ModelSerializer):
         instance.status = validated_data.get('status', instance.status)
         instance.admin = self.context.get('admin')
         instance.save()
-
-        # Resposts'larni yangilash yoki qo'shish
-        if resposts_data is not None:
-            existing_resposts = {respost.id: respost for respost in instance.resposts.all()}
-
-            for respost_data_item in resposts_data:
-                respost_id = respost_data_item.get('id', None)
-
-                if respost_id and respost_id in existing_resposts:
-                    # Agar respost mavjud bo'lsa, uni yangilaymiz
-                    respost = existing_resposts[respost_id]
-                    
-                    for attr, value in respost_data_item.items():
-                        setattr(respost, attr, value)
-                    respost.save()
-                else:
-                    # Agar respost yangi bo'lsa, uni yaratamiz
-                    # Use filter() instead of get_or_create()
-                    new_respost = Reports.objects.filter(reports_name=instance, **respost_data_item).first()
-                    if not new_respost:
-                        Reports.objects.create(reports_name=instance, **respost_data_item)
 
         # Kommentlarni yangilash yoki qo'shish
         if comment_data:

@@ -18,7 +18,6 @@ class Project(models.Model):
     address = models.CharField(max_length=250, verbose_name='Адрес')
     opening_date = models.DateField(verbose_name='Дата открытия')
     submission_deadline = models.DateField(verbose_name='Дедлайн по сдаче')
-    contractor = models.ManyToManyField(CustomUser, blank=True, related_name='contractor', verbose_name='Подрядчики')
     status = models.ForeignKey(ProjectStatus, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Статус')
     owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True, related_name='onwer', verbose_name='Создатель')
     create_at = models.DateTimeField(auto_now_add=True)

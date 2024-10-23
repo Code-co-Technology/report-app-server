@@ -67,13 +67,33 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
         for index, respost_data in enumerate(resposts_data):
             bob_id = respost_data.get('bob')
             type_work_id = respost_data.get('type_work')
+            position = respost_data.get('position')
+            quantity = respost_data.get('quantity')
+            frame = respost_data.get('frame')
+            floor = respost_data.get('floor')
+            mark = respost_data.get('mark')
+            axles = respost_data.get('axles')
+            premises = respost_data.get('premises')
+            completions = respost_data.get('completions')
             
             bob = get_object_or_404(Bob, id=bob_id)
             type_work = get_object_or_404(TypeWork, id=type_work_id)
             
             if index < len(respost_image):
                 report_file = respost_image[index]
-                reports_instance = Reports.objects.create(reports_name=reports_name, bob=bob, type_work=type_work)
+                reports_instance = Reports.objects.create(
+                    reports_name=reports_name,
+                    bob=bob, 
+                    type_work=type_work,
+                    position=position,
+                    quantity=quantity,
+                    frame=frame,
+                    floor=floor,
+                    mark=mark,
+                    axles=axles,
+                    premises=premises,
+                    completions=completions
+                )
                 ReportFile.objects.create(report_file=reports_instance, file=report_file)
 
         return reports_name
@@ -104,19 +124,43 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
             bob_instance = get_object_or_404(Bob, id=bob_id)
             type_work_instance = get_object_or_404(TypeWork, id=type_work_id)
 
+            position = respost_data_item.get('position')
+            quantity = respost_data_item.get('quantity')
+            frame = respost_data_item.get('frame')
+            floor = respost_data_item.get('floor')
+            mark = respost_data_item.get('mark')
+            axles = respost_data_item.get('axles')
+            premises = respost_data_item.get('premises')
+            completions = respost_data_item.get('completions')
+
             if respost_id and respost_id in existing_resposts:
                 # Mavjud respostni yangilash
                 respost = existing_resposts[respost_id]
-                print(bob_instance)
-                respost.bob = bob_instance  # Bob instansiyasini tayinlash
-                respost.type_work = type_work_instance  # TypeWork instansiyasini tayinlash
+                respost.bob = bob_instance 
+                respost.type_work = type_work_instance
+                respost.position=position,
+                respost.quantity=quantity,
+                respost.frame=frame,
+                respost.floor=floor,
+                respost.mark=mark,
+                respost.axles=axles,
+                respost.premises=premises,
+                respost.completions=completions
                 respost.save()
             else:
                 # Yangi respost yaratish
                 Reports.objects.create(
                     reports_name=instance,
-                    bob=bob_instance,  # Bu yerda Bob instansiyasini foydalanamiz
+                    bob=bob_instance,
                     type_work=type_work_instance,
+                    position=position,
+                    quantity=quantity,
+                    frame=frame,
+                    floor=floor,
+                    mark=mark,
+                    axles=axles,
+                    premises=premises,
+                    completions=completions
                 )
         # Kommentlarni yangilash yoki qo'shish
         if comment_data:

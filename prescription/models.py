@@ -18,8 +18,6 @@ class TypeOfViolation(models.Model):
 
 class Prescriptions(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='project_prescription', verbose_name='Проект')
-    contractor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Подрядчик')
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True, related_name='assistant', verbose_name='Выбрать сотрудника')
     type_violation = models.ManyToManyField(TypeOfViolation, blank=True, verbose_name='Тип нарушения')
     deadline = models.DateField(verbose_name='Срок устранения')
     user = models.ForeignKey
@@ -28,8 +26,9 @@ class Prescriptions(models.Model):
         (3, 'Устранено'),
         (4, 'Просрочено'),
         (5, 'Null'),
-    )
+    ) 
     status = models.IntegerField(choices=STATUS, default=1, verbose_name='Статус')
+    contractors = models.ManyToManyField(CustomUser, through='PrescriptionContractor', related_name='contractor_prescriptions', verbose_name='Подрядчики')
     owner = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='owner', verbose_name='Владелец')
     create_at = models.DateTimeField(auto_now_add=True)
 
@@ -40,6 +39,16 @@ class Prescriptions(models.Model):
         db_table = "prescriptions"
         verbose_name = "Предписания"
         verbose_name_plural = "Предписания"
+
+
+class PrescriptionContractor(models.Model):
+    prescription = models.ForeignKey(Prescriptions, on_delete=models.CASCADE, related_name='contractor_statuses')
+    contractor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='Подрядчик')
+    status = models.IntegerField(choices=Prescriptions.STATUS, default=1, verbose_name='Статус для подрядчика')
+    create_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.contractor.username} - {self.prescription.id} - {self.status}"
 
 
 class PrescriptionsImage(models.Model):
@@ -62,3 +71,5 @@ class PrescriptionsComment(models.Model):
         db_table = "prescriptions_comment"
         verbose_name = "Предписания комментарий"
         verbose_name_plural = "Предписания комментарий"
+
+

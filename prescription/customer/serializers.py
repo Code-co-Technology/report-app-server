@@ -33,7 +33,6 @@ class PrescriptionsCommentSerializer(serializers.ModelSerializer):
 class CustomerPrescriptionsSerializers(serializers.ModelSerializer):
     project = AdminProjectsSerializer(read_only=True)
     owner = UserInformationCustomerSerializer(read_only=True)
-    contractor = UserInformationContractorSerializer(read_only=True)
     type_violation = TypeOFViolationSerializer(many=True)
     prescription_image = PrescriptionsImageSerializer(many=True)
     prescription_comment = PrescriptionsCommentSerializer(many=True)
@@ -41,7 +40,7 @@ class CustomerPrescriptionsSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Prescriptions
-        fields = ['id', 'status', 'project', 'contractor', 'type_violation', 'deadline', 'owner', 'prescription_image', 'prescription_comment', 'create_at']
+        fields = ['id', 'status', 'project', 'type_violation', 'deadline', 'owner', 'prescription_image', 'prescription_comment', 'create_at']
 
 
 class CustomerPrescriptionSerializers(serializers.ModelSerializer):
@@ -53,7 +52,7 @@ class CustomerPrescriptionSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Prescriptions
-        fields = ['id', 'project', 'contractor', 'type_violation', 'deadline', 'owner', 'prescription_image', 'prescription_comment', 'create_at']
+        fields = ['id', 'project', 'type_violation', 'deadline', 'owner', 'prescription_image', 'prescription_comment', 'create_at']
 
     def create(self, validated_data):
         owner = self.context.get('owner')

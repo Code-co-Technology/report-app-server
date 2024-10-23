@@ -93,11 +93,10 @@ class AdminCreateProjectSerializer(serializers.ModelSerializer):
         write_only=True, required=False) # Optional
     project_files = serializers.ListField(child = serializers.FileField(max_length = 1000000, allow_empty_file = False, use_url = False),
         write_only=True, required=False) # Optional
-    contractor = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Project
-        fields = ['id', 'address', 'opening_date', 'submission_deadline', 'contractor', 'project_image', 'project_files']
+        fields = ['id', 'address', 'opening_date', 'submission_deadline', 'project_image', 'project_files']
         # The list of required fields will automatically have required=True
         extra_kwargs = {
             'address': {'required': True},
@@ -123,20 +122,6 @@ class AdminCreateProjectSerializer(serializers.ModelSerializer):
         project.status = status_project
         project.owner = self.context.get('owner')
         project.contractor.set(contractors_data)
-
-        # Process contractors only if provided
-        if contractors_data:
-        # Ensure contractors_data is a list of valid user IDs
-            valid_contractors = []
-            for contractor_id in contractors_data:
-                try:
-                    version_obj = CustomUser.objects.get(id=contractor_id)
-                    valid_contractors.append(version_obj)  # Collect valid contractor objects
-                except CustomUser.DoesNotExist:
-                    raise serializers.ValidationError(f'Contractor with id {contractor_id} does not exist.')
-
-            # Set the valid contractors to the project's contractor field
-            project.contractor.set(valid_contractors)
 
         project.save()
 
@@ -166,7 +151,7 @@ class AdminUpdateProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'address', 'opening_date', 'submission_deadline', 'contractor', 'project_image', 'project_files']
+        fields = ['id', 'address', 'contractor', 'opening_date', 'submission_deadline', 'project_image', 'project_files']
         # The list of required fields will automatically have required=True
         extra_kwargs = {
             'address': {'required': True},
@@ -179,28 +164,10 @@ class AdminUpdateProjectSerializer(serializers.ModelSerializer):
         images_data = validated_data.pop('project_image', [])
         files_data = validated_data.pop('project_files', [])
 
-        # Handle contractors_data as optional
-        contractors_data = validated_data.pop('contractor', None)
-        if contractors_data:
-            contractors_data = json.loads(contractors_data)
-
         # Update instance fields
         instance.address = validated_data.get('address', instance.address)
         instance.opening_date = validated_data.get('opening_date', instance.opening_date)
         instance.submission_deadline = validated_data.get('submission_deadline', instance.submission_deadline)
-
-        # Process contractors only if provided
-        if contractors_data:
-            valid_contractors = []
-            for contractor_id in contractors_data:
-                try:
-                    version_obj = CustomUser.objects.get(id=contractor_id)
-                    valid_contractors.append(version_obj)  # Collect valid contractor objects
-                except CustomUser.DoesNotExist:
-                    raise serializers.ValidationError(f'Contractor with id {contractor_id} does not exist.')
-
-            # Update contractors
-            instance.contractor.set(valid_contractors)
 
         instance.save()
 

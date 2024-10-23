@@ -103,8 +103,6 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         constructor = self.context.get('constructor')
-        if constructor.block_sending_report:
-            raise serializers.ValidationError({"error": "Вы не можете отправить отчет. Отчет заблокирован."})
 
         # resposts ma'lumotlarini validated_data'dan ajratish
         resposts_data = self.initial_data.get('resposts', '[]')

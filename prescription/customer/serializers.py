@@ -49,10 +49,11 @@ class CustomerPrescriptionSerializers(serializers.ModelSerializer):
     prescription_comment = serializers.ListField(child = serializers.CharField(max_length = 1000000),
         write_only=True, required=False)
     type_violation = serializers.CharField(write_only=True, required=False)
+    prescription = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Prescriptions
-        fields = ['id', 'project', 'type_violation', 'deadline', 'owner', 'prescription_image', 'prescription_comment', 'create_at']
+        fields = ['id', 'project', 'type_violation', 'deadline', 'owner', 'prescription_image', 'prescription_comment', 'prescription', 'create_at']
 
     def create(self, validated_data):
         owner = self.context.get('owner')

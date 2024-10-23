@@ -248,7 +248,8 @@ class UserInformationContractorSerializer(serializers.ModelSerializer):
             'failed_reports',
             'penalty',
             'block_contractor',
-            'block_sending_report'
+            'block_sending_report',
+            'report_processing',
         ]
 
 

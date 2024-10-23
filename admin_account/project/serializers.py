@@ -66,26 +66,32 @@ class AdminProjectFileSerializer(serializers.ModelSerializer):
         return instance
 
 
+class PrescriptionContractorSerializer(serializers.ModelSerializer):
+    contractor = UserInformationContractorSerializer(read_only=True)  # 'contractor' ga tegishli bo'lgan serializer
+
+    class Meta:
+        model = PrescriptionContractor
+        fields = ['id', 'contractor', 'status']
+
+
 class CustomerPrescriptionsProjectSerializers(serializers.ModelSerializer):
-    owner = UserInformationCustomerSerializer(read_only=True)
-    contractor = UserInformationContractorSerializer(read_only=True)
-    status = serializers.CharField(source='get_status_display')
+    contractor_statuses = PrescriptionContractorSerializer(many=True)
+    owner = UserInformationContractorSerializer(read_only=True) 
 
     class Meta:
         model = Prescriptions
-        fields = ['id', 'status', 'contractor', 'type_violation', 'deadline', 'owner', 'prescription_image', 'prescription_comment', 'create_at']
+        fields = ['id', 'deadline', 'contractor_statuses', 'owner']
 
 
 class AdminProjectsSerializer(serializers.ModelSerializer):
     project_image = AdminProjectImagesSerializer(many=True, read_only=True)
     project_files = AdminProjectFilesSerializer(many=True, read_only=True)
-    contractor = UserInformationContractorSerializer(many=True)
     project_prescription = CustomerPrescriptionsProjectSerializers(many=True)
     status = ProjectStatusSerializer(read_only=True)
 
     class Meta:
         model = Project
-        fields = ['id', 'address', 'opening_date', 'submission_deadline', 'contractor', 'status', 'project_image', 'project_files', 'project_prescription']
+        fields = ['id', 'address', 'opening_date', 'submission_deadline', 'status', 'project_image', 'project_files', 'project_prescription']
 
 
 class AdminCreateProjectSerializer(serializers.ModelSerializer):
@@ -112,7 +118,7 @@ class AdminCreateProjectSerializer(serializers.ModelSerializer):
         contractors_data = validated_data.pop('contractor', [])
         if contractors_data:
             contractors_data = json.loads(contractors_data) 
-
+        deadline = validated_data.get('submission_deadline')
         status_project = ProjectStatus.objects.get(name='В обработке')
         project = Project.objects.create(**validated_data)
         project.status = status_project
@@ -122,7 +128,9 @@ class AdminCreateProjectSerializer(serializers.ModelSerializer):
         if contractors_data:
             presc = Prescriptions.objects.create(
                 project=project,
-                status=1
+                deadline=deadline,
+                status=1,
+                owner=self.context.get('owner')
             )
             for contractor_id in contractors_data:
                 contractor = CustomUser.objects.get(id=contractor_id)  # Get the CustomUser instance
@@ -153,10 +161,11 @@ class AdminUpdateProjectSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False
     )  # Optional
+    contractor = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Project
-        fields = ['id', 'address', 'opening_date', 'submission_deadline', 'project_image', 'project_files']
+        fields = ['id', 'address', 'opening_date', 'contractor', 'submission_deadline', 'project_image', 'project_files']
         # The list of required fields will automatically have required=True
         extra_kwargs = {
             'address': {'required': True},
@@ -172,7 +181,7 @@ class AdminUpdateProjectSerializer(serializers.ModelSerializer):
         # Update instance fields
         instance.address = validated_data.get('address', instance.address)
         instance.opening_date = validated_data.get('opening_date', instance.opening_date)
-        instance.submission_deadline = validated_data.get('submission_deadline', instance.submission_deadline)
+        new_submission_deadline = validated_data.get('submission_deadline', instance.submission_deadline)
 
         instance.save()
 
@@ -189,5 +198,46 @@ class AdminUpdateProjectSerializer(serializers.ModelSerializer):
             ProjectSmeta.objects.filter(project=instance).delete()  # Optional: Uncomment if you want to replace files
             for file_data in files_data:
                 ProjectSmeta.objects.create(project=instance, files=file_data)
+        
+        contractors_data = validated_data.pop('contractor', None)
+    
+        # If either contractors or submission_deadline is updated
+        if contractors_data or new_submission_deadline != instance.submission_deadline:
+            if contractors_data:
+                contractors_data = json.loads(contractors_data)
+
+            # Clear existing contractor relationships only if contractors_data has changed
+            PrescriptionContractor.objects.filter(prescription__project=instance).delete()
+
+            # Check if we need to create or update Prescriptions instance
+            presc = Prescriptions.objects.filter(project=instance).first()
+            if presc is None:
+                # If no existing prescription, create a new one
+                presc = Prescriptions.objects.create(
+                    project=instance,
+                    deadline=new_submission_deadline,
+                    status=1,
+                    owner=self.context.get('owner')
+                )
+            else:
+                # Update existing prescription's deadline if it has changed
+                if new_submission_deadline != instance.submission_deadline:
+                    presc.deadline = new_submission_deadline
+                    presc.save()
+
+            # Now handle contractor assignments if contractors_data is provided
+            if contractors_data:
+                for contractor_id in contractors_data:
+                    contractor = CustomUser.objects.get(id=contractor_id)
+                    PrescriptionContractor.objects.create(
+                        prescription=presc,
+                        contractor=contractor,
+                        status=1  # Default status for contractors
+                    )
+
+        # Update submission deadline for the project instance if changed
+        if new_submission_deadline != instance.submission_deadline:
+            instance.submission_deadline = new_submission_deadline
+            instance.save()
 
         return instance

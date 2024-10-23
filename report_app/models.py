@@ -40,7 +40,7 @@ class ReportsName(models.Model):
         (2, 'Отправлено'),
         (3, 'Принято'),
         (4, 'Отказ'),
-        (5, 'Null'),
+        (5, 'Вернулся'),
     )
     status_contractor = models.IntegerField(choices=STATUS_CONTR, default=5, verbose_name='Статус подрядчики')
     STATUS_CUSTOMER = (

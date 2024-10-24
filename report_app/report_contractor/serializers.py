@@ -59,8 +59,8 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
         
         # Foydalanuvchini context orqali bog'lab qo'shish
         reports_name.constructor = self.context.get('constructor')
-        reports_name.status_contractor = 1
-        reports_name.status_customer = 2
+        reports_name.status_contractor = 2
+        reports_name.status_customer = 1
         reports_name.save()
 
         for index, respost_data in enumerate(resposts_data):

@@ -105,24 +105,12 @@ class ContractorUserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['id', 'email', 'first_name', 'last_name', 'phone', 'avatar', 'activate_profile', 'company', 'groups']
     
-    def validate(self, attrs):
-        # Check for unique email and phone in the validated data
-        email = attrs.get('email')
-        phone = attrs.get('phone')
-
-        if CustomUser.objects.exclude(pk=self.instance.pk).filter(email=email).exists():
-            raise serializers.ValidationError({'error': 'Электронная почта должна быть уникальной. Этот адрес электронной почты принадлежит другому пользователю.'})
-
-        if CustomUser.objects.exclude(pk=self.instance.pk).filter(phone=phone).exists():
-            raise serializers.ValidationError({'error': 'Номер телефона должен быть уникальным. Этот номер телефона принадлежит другому пользователю.'})
-
-        return attrs
-
     def update(self, instance, validated_data):
         instance.email = validated_data.get("email", instance.email)
         instance.first_name = validated_data.get("first_name", instance.first_name)
         instance.last_name = validated_data.get("last_name", instance.last_name)
         instance.phone = validated_data.get("phone", instance.phone)
+        instance.activate_profile = validated_data.get("activate_profile", instance.activate_profile)
 
         # Update avatar only if provided
         if instance.avatar == None:

@@ -49,10 +49,7 @@ class CustomerPrescriptionSerializers(serializers.ModelSerializer):
     prescription_comment = serializers.ListField(child = serializers.CharField(max_length = 1000000),
         write_only=True, required=False)
     type_violation = serializers.CharField(write_only=True, required=False)
-    contractors = serializers.ListField(
-        child=serializers.IntegerField(),  # Expecting a list of contractor IDs
-        write_only=True, required=False
-    )
+    contractors = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Prescriptions
@@ -68,7 +65,8 @@ class CustomerPrescriptionSerializers(serializers.ModelSerializer):
         prescription_comment = validated_data.pop('prescription_comment', [])
         images_data = validated_data.pop('prescription_image', [])
         contractors_data = validated_data.pop('contractors', [])
-        print(contractors_data)
+        if contractors_data:
+            contractors_data = json.loads(contractors_data) 
         type_violation_data = json.loads(validated_data.pop('type_violation', '[]'))
 
         # Create the prescription object
@@ -98,8 +96,7 @@ class CustomerPrescriptionSerializers(serializers.ModelSerializer):
         
         if contractors_data:
             contractors = CustomUser.objects.filter(id__in=contractors_data)
-            for contractor in contractors:
-                PrescriptionContractor.objects.create(prescription=prescription, contractor=contractor, status=1)
+            prescription.contractors.set(contractors)
 
         return prescription
     

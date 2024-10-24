@@ -16,6 +16,25 @@ from report_app.reports.serializers import ReportsNamesSerializer
 from report_app.report_user.serializers import ReportsNameCreateSerializer
 
 
+
+class UserReportCount(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsUser]
+
+    @swagger_auto_schema(
+        tags=['Report User'],
+        responses={200: ReportsNamesSerializer(many=True)},
+    )
+    def get(self, request):
+        report_send = ReportsName.objects.filter(user=request.user.id, status_user=1).count()
+        report_return = ReportsName.objects.filter(user=request.user.id, status_user=3).count()
+        report_accepted = ReportsName.objects.filter(user=request.user.id, status_user=2).count()
+
+        return Response({'report_send': report_send, 'report_return': report_return, 'report_accepted': report_accepted}, status=status.HTTP_200_OK)
+    
+
+
 class UserReportReceivedView(APIView):
     render_classes = [UserRenderers]
     authentication_classes = [JWTAuthentication]

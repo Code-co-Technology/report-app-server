@@ -29,9 +29,12 @@ class ContractorReporCountView(APIView):
         operation_summary='Report Count'
     )
     def get(self, request):
-        instances = ReportsName.objects.filter(user__company=request.user.company, status_contractor=1).count()
-        serializer = ReportsNamesSerializer(instances, many=True, context={'request':request})
-        return Response(instances, status=status.HTTP_200_OK)
+        report_new = ReportsName.objects.filter(user__company=request.user.company, status_customer=1).count()
+        report_send = ReportsName.objects.filter(constructor=request.user.id, status_contractor=2).count()
+        report_return = ReportsName.objects.filter(constructor=request.user.id, status_contractor=4).count()
+        report_accepted = ReportsName.objects.filter(constructor=request.user.id, status_contractor=3).count()
+
+        return Response({'new': report_new, 'report_send': report_send, 'report_return': report_return, 'report_accepted': report_accepted}, status=status.HTTP_200_OK)
 
 
 class ContractorReporNewView(APIView):

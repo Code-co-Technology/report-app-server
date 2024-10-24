@@ -17,64 +17,23 @@ from report_app.reports.serializers import ReportsNamesSerializer
 from report_app.report_customer.serializers import ReportsNameCustomerSerializer
 
 
-class CustomerReporNewView(APIView):
+class CusntomerReporCountView(APIView):
     render_classes = [UserRenderers]
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsCustomer]
-    pagination_class = PaginationList
 
     @swagger_auto_schema(
         tags=['Report Customer'],
         responses={200: ReportsNamesSerializer(many=True)},
-        operation_summary='New report'
+        operation_summary='Report Count'
     )
     def get(self, request):
-        instances = ReportsName.objects.filter(status_customer=1).order_by('-id')
-        # Pagination logic
-        paginator = self.pagination_class()
-        paginated_instances = paginator.paginate_queryset(instances, request)
-        serializer = ReportsNamesSerializer(paginated_instances, many=True, context={'request':request})
-        return paginator.get_paginated_response(serializer.data)
+        report_new = ReportsName.objects.filter(status_customer=1).count()
+        report_send = ReportsName.objects.filter(customer=request.user.id, status_customer=2).count()
+        report_return = ReportsName.objects.filter(customer=request.user.id, status_customer=4).count()
+        report_accepted = ReportsName.objects.filter(customer=request.user.id, status_customer=3).count()
 
-
-class CustomerReporReceivedView(APIView):
-    render_classes = [UserRenderers]
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsCustomer]
-    pagination_class = PaginationList
-
-    @swagger_auto_schema(
-        tags=['Report Customer'],
-        responses={200: ReportsNamesSerializer(many=True)},
-        operation_summary='Reports received'
-    )
-    def get(self, request):
-        instances = ReportsName.objects.filter(customer=request.user, status_customer=3).order_by('-id')
-        # Pagination logic
-        paginator = self.pagination_class()
-        paginated_instances = paginator.paginate_queryset(instances, request)
-        serializer = ReportsNamesSerializer(paginated_instances, many=True, context={'request':request})
-        return paginator.get_paginated_response(serializer.data)
-
-
-class CustomerReportReturnView(APIView):
-    render_classes = [UserRenderers]
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsCustomer]
-    pagination_class = PaginationList
-
-    @swagger_auto_schema(
-        tags=['Report Customer'],
-        responses={200: ReportsNamesSerializer(many=True)},
-        operation_summary='Returned reports'
-    )
-    def get(self, request):
-        instances = ReportsName.objects.filter(customer=request.user, status_customer=4).order_by('-id')
-        # Pagination logic
-        paginator = self.pagination_class()
-        paginated_instances = paginator.paginate_queryset(instances, request)
-        serializer = ReportsNamesSerializer(paginated_instances, many=True, context={'request':request})
-        return paginator.get_paginated_response(serializer.data)
+        return Response({'new': report_new, 'report_send': report_send, 'report_return': report_return, 'report_accepted': report_accepted}, status=status.HTTP_200_OK)
     
 
 class CustomerReportsView(APIView):

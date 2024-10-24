@@ -27,9 +27,10 @@ class ContractorsPrescriptionCountView(APIView):
         responses={200: CustomerPrescriptionsSerializers(many=True)}
     )
     def get(self, request):
-        instance = Prescriptions.objects.filter(contractor=request.user, status=1).count()
-        serializer = CustomerPrescriptionsSerializers(instance, many=True, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        new = PrescriptionContractor.objects.filter(contractor=request.user, status=1).count()
+        fiex = PrescriptionContractor.objects.filter(contractor=request.user, status=2).count()
+        Просрочено = PrescriptionContractor.objects.filter(contractor=request.user, status=3).count()
+        return Response({'new': new, 'fiex':fiex, 'Просрочено':Просрочено}, status=status.HTTP_200_OK)
 
 class ContractorsPrescriptionNewView(APIView):
     render_classes = [UserRenderers]

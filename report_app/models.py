@@ -48,7 +48,7 @@ class ReportsName(models.Model):
         (2, 'Отправлено'),
         (3, 'Принято'),
         (4, 'Отказ'),
-        (5, 'Null'),
+        (5, 'Вернулся'),
     )
     status_customer = models.IntegerField(choices=STATUS_CUSTOMER, default=5, verbose_name='Статус сотрудники')
     STATUS = (

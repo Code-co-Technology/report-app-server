@@ -108,7 +108,7 @@ class ContractorReportReturnView(APIView):
         serializer = ReportsNamesSerializer(paginated_instances, many=True, context={'request':request})
         return paginator.get_paginated_response(serializer.data)
     
-
+from django.db.models import Q
 class ContractorReportsView(APIView):
     render_classes = [UserRenderers]
     authentication_classes = [JWTAuthentication]
@@ -131,7 +131,7 @@ class ContractorReportsView(APIView):
     def get(self, request):
         # Foydalanuvchi uchun filtrlanadigan barcha hisobotlarni olish
         company = Company.objects.get(id=request.user.company.id)
-        instances = ReportsName.objects.filter(constructor=request.user).order_by('-id')
+        instances = ReportsName.objects.filter(Q(user__company=request.user.company) | Q(constructor=request.user)).order_by('-id')
 
         # Query parametrlardan 'status_customer' qiymatini olish
         status_customer = request.query_params.get('status_customer')

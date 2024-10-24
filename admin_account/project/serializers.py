@@ -86,12 +86,11 @@ class CustomerPrescriptionsProjectSerializers(serializers.ModelSerializer):
 class AdminProjectsSerializer(serializers.ModelSerializer):
     project_image = AdminProjectImagesSerializer(many=True, read_only=True)
     project_files = AdminProjectFilesSerializer(many=True, read_only=True)
-    project_prescription = CustomerPrescriptionsProjectSerializers(many=True)
     status = ProjectStatusSerializer(read_only=True)
 
     class Meta:
         model = Project
-        fields = ['id', 'address', 'opening_date', 'submission_deadline', 'status', 'project_image', 'project_files', 'project_prescription']
+        fields = ['id', 'address', 'opening_date', 'submission_deadline', 'status', 'project_image', 'project_files']
 
 
 class AdminCreateProjectSerializer(serializers.ModelSerializer):

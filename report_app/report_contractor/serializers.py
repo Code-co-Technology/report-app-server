@@ -77,9 +77,11 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
             
             bob = get_object_or_404(Bob, id=bob_id)
             type_work = get_object_or_404(TypeWork, id=type_work_id)
+            print(bob)
             
             if index < len(respost_image):
                 report_file = respost_image[index]
+                
                 reports_instance = Reports.objects.create(
                     reports_name=reports_name,
                     bob=bob, 

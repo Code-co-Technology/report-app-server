@@ -1,6 +1,51 @@
 from rest_framework import serializers
 
-from prescription.models import Prescriptions, PrescriptionsComment
+from authen.serializers import UserInformationSerializer, UserInformationContractorSerializer
+from admin_account.project.serializers import AdminProjectsSerializer
+from prescription.models import Prescriptions, PrescriptionsComment, PrescriptionContractor
+from prescription.customer.serializers import TypeOFViolationSerializer
+
+
+class ConstractorPrescriptionSerializer(serializers.ModelSerializer):
+    project_prescription = serializers.SerializerMethodField()
+    status = serializers.CharField(source='get_status_display')
+    owner = serializers.SerializerMethodField()
+    type_violation = TypeOFViolationSerializer(many=True)
+
+    class Meta:
+        model = Prescriptions
+        fields = ['id', 'project_prescription', 'type_violation', 'deadline', 'status', 'owner', 'create_at']
+    
+    def get_project_prescription(self, obj):
+        return {
+            'address': obj.project.address,
+        }
+    
+    def get_owner(self, obj):
+        return {
+            'first_name': obj.owner.first_name,
+            'last_name': obj.owner.last_name,
+        }
+
+
+class ConstractorPrescriptionsSerializer(serializers.ModelSerializer):
+    prescription = ConstractorPrescriptionSerializer(read_only=True)
+    status = serializers.CharField(source='get_status_display')
+    user = serializers.SerializerMethodField()
+    contractor = UserInformationContractorSerializer(read_only=True)
+
+    class Meta:
+        model = PrescriptionContractor
+        fields = ['id', 'prescription', 'contractor', 'user', 'status', 'create_at']
+
+    def get_user(self, obj):
+        if obj.user:
+            return {
+                'first_name': obj.user.first_name,
+                'last_name': obj.user.last_name,
+            }
+        return None 
+
 
 
 class ContractorsPrescriptionSerializers(serializers.ModelSerializer):

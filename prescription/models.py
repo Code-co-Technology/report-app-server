@@ -24,11 +24,12 @@ class Prescriptions(models.Model):
         (1, 'В обработке'),
         (3, 'Устранено'),
         (4, 'Просрочено'),
-        (5, 'Null'),
+        (5, 'Новый'),
+        (6, 'Null'),
     ) 
     status = models.IntegerField(choices=STATUS, default=1, verbose_name='Статус')
-    contractors = models.ManyToManyField(CustomUser, through='PrescriptionContractor', related_name='contractor_prescriptions', verbose_name='Подрядчики')
-    owner = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='owner', verbose_name='Владелец')
+    contractors = models.ManyToManyField(CustomUser, through='PrescriptionContractor', through_fields=('prescription', 'contractor'), related_name='contractor_prescriptions', verbose_name='Подрядчики') 
+    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='owner_prec', verbose_name='Владелец')
     create_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -41,10 +42,17 @@ class Prescriptions(models.Model):
 
 
 class PrescriptionContractor(models.Model):
-    prescription = models.ForeignKey(Prescriptions, on_delete=models.CASCADE, related_name='contractor_statuses')
-    contractor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='Подрядчик')
+    prescription = models.ForeignKey(Prescriptions, on_delete=models.CASCADE, related_name='contractor_statuses', verbose_name='Предписания')
+    contractor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='contractor_for_prescription', verbose_name='Подрядчик')  # related_name o'zgartirildi
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True, related_name='employee_for_prescription', verbose_name='Сотрудник') 
     status = models.IntegerField(choices=Prescriptions.STATUS, default=1, verbose_name='Статус для подрядчика')
     create_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "prescriptions_contratctor"
+        verbose_name = "Предписания Подрядчики"
+        verbose_name_plural = "Предписания Подрядчики"
+        unique_together = ('prescription', 'contractor', 'user')
 
     def __str__(self):
         return f"{self.contractor.username} - {self.prescription.id} - {self.status}"

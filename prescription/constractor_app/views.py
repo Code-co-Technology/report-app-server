@@ -12,9 +12,9 @@ from utils.permissions import IsContractors
 
 from admin_account.project.views import AdminProjectsSerializer
 
-from prescription.models import Prescriptions
+from prescription.models import Prescriptions, PrescriptionContractor
 from prescription.customer.serializers import CustomerPrescriptionsSerializers
-from prescription.constractor_app.serializers import ContractorsPrescriptionSerializers
+from prescription.constractor_app.serializers import ContractorsPrescriptionSerializers, ConstractorPrescriptionsSerializer
 
 
 class ContractorsPrescriptionCountView(APIView):
@@ -95,16 +95,32 @@ class ContractorsPrescriptionsView(APIView):
 
     @swagger_auto_schema(
         tags=['Prescription Contractors'],
-        responses={200: CustomerPrescriptionsSerializers(many=True)}
+        responses={200: ConstractorPrescriptionsSerializer(many=True)}
     )
     def get(self, request):
-        instance = Prescriptions.objects.filter(contractors=request.user).order_by('-id')
+        instance = PrescriptionContractor.objects.filter(contractor=request.user).order_by('-id')
         # Pagination logic
         paginator = self.pagination_class()
         paginated_instances = paginator.paginate_queryset(instance, request)
         # Serializing paginated data
-        serializer = CustomerPrescriptionsSerializers(paginated_instances, many=True, context={'request': request})
+        serializer = ConstractorPrescriptionsSerializer(paginated_instances, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
+
+
+class ContractorsPrescriptionUserView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsContractors]
+
+    @swagger_auto_schema(
+        tags=['Prescription Contractors'],
+        responses={200: ConstractorPrescriptionsSerializer(many=True)}
+    )
+    def get(self, request, pk):
+        instance = get_object_or_404(PrescriptionContractor, prescription=pk).order_by('-id')
+
+        serializer = ConstractorPrescriptionsSerializer(instance, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ContractorsPrescriptionView(APIView):

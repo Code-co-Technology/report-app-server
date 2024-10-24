@@ -11,6 +11,8 @@ from utils.pagination import PaginationList
 from utils.renderers import UserRenderers
 from utils.permissions import IsAdmin
 
+from prescription.constractor_app.serializers import ConstractorPrescriptionsSerializer
+from prescription.models import PrescriptionContractor
 from admin_account.models import Project, ProjectImage, ProjectSmeta
 from admin_account.project.serializers import (
     AdminProjectsSerializer, AdminCreateProjectSerializer, AdminUpdateProjectSerializer, 
@@ -52,7 +54,24 @@ class AdminProjectsView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
+class AdminProjectPrescriptionView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdmin]
+
+    @swagger_auto_schema(
+        tags=['Admin Account Project'],
+        responses={200: ConstractorPrescriptionsSerializer(many=True)},
+        operation_summary='Admin get by project id',
+        operation_description='Admin get by project id'
+    )
+    def get(self, request, pk):
+        instances = PrescriptionContractor.objects.filter(prescription__project__id=pk)
+        serializer = ConstractorPrescriptionsSerializer(instances, many=True, context={'request':request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class AdminProjectView(APIView):
     render_classes = [UserRenderers]

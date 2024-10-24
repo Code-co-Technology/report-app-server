@@ -14,9 +14,10 @@ from admin_account.project.views import AdminProjectsSerializer
 
 
 
-from prescription.models import Prescriptions
+from prescription.models import Prescriptions, PrescriptionContractor
 from prescription.customer.serializers import CustomerPrescriptionsSerializers
 from prescription.admin_acc.serializers import AdminPrescriptionSerializers
+from prescription.constractor_app.serializers import ConstractorPrescriptionsSerializer
 
 
 class AdminPrescriptionsView(APIView):
@@ -27,14 +28,14 @@ class AdminPrescriptionsView(APIView):
 
     @swagger_auto_schema(
         tags=['Prescription Admin'],
-        responses={200: CustomerPrescriptionsSerializers(many=True)}
+        responses={200: ConstractorPrescriptionsSerializer(many=True)}
     )
     def get(self, request):
-        instance = Prescriptions.objects.all().order_by('-id')
+        instance = PrescriptionContractor.objects.all().order_by('-id')
         # Pagination logic
         paginator = self.pagination_class()
         paginated_instances = paginator.paginate_queryset(instance, request)
-        serializer = CustomerPrescriptionsSerializers(paginated_instances, many=True, context={'request':request})
+        serializer = ConstractorPrescriptionsSerializer(paginated_instances, many=True, context={'request':request})
         return paginator.get_paginated_response(serializer.data)
 
 

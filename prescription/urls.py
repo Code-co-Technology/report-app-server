@@ -7,7 +7,7 @@ from prescription.admin_acc.views import AdminPrescriptionsView, AdminPrescripti
 from prescription.constractor_app.views import (
     ContractorsPrescriptionsView, ContractorsPrescriptionNewView, 
     ContractorsPrescriptioneliminatedView, ContractorsPrescriptioneExpiredView, 
-    ContractorsPrescriptionView, ContractorsPrescriptionCountView
+    ContractorsPrescriptionView, ContractorsPrescriptionCountView, ContractorsPrescriptionUserView
 )
 from prescription.user_app.views import (
     UserPrescriptionNewView, UserPrescriptioneliminatedView,
@@ -32,6 +32,7 @@ urlpatterns = [
     path('prescription/new/contractor/', ContractorsPrescriptionNewView.as_view()),
     path('prescription/liminate/contractor/', ContractorsPrescriptioneliminatedView.as_view()),
     path('prescription/expired/contractor/', ContractorsPrescriptioneExpiredView.as_view()),
+    path('prescription/contractor/user/add/<int:pk>/', ContractorsPrescriptionUserView.as_view()),
     # User
     path('prescription/user/', UserPrescriptionsView.as_view()),
     path('prescription/user/<int:pk>/', UserPrescriptionView.as_view()),

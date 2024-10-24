@@ -47,6 +47,18 @@ class ConstractorPrescriptionsSerializer(serializers.ModelSerializer):
         return None 
 
 
+class ConstractorPrescriptionsUpddateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PrescriptionContractor
+        fields = ['id', 'prescription', 'user']
+
+    def update(self, instance, validated_data):
+        instance.user = validated_data.get('user', instance.user)
+        # Update instance fields
+        instance.save()
+        return instance
+
 
 class ContractorsPrescriptionSerializers(serializers.ModelSerializer):
     prescription_comment = serializers.ListField(

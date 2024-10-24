@@ -14,7 +14,7 @@ from admin_account.project.views import AdminProjectsSerializer
 
 from prescription.models import Prescriptions, PrescriptionContractor
 from prescription.customer.serializers import CustomerPrescriptionsSerializers
-from prescription.constractor_app.serializers import ContractorsPrescriptionSerializers, ConstractorPrescriptionsSerializer
+from prescription.constractor_app.serializers import ContractorsPrescriptionSerializers, ConstractorPrescriptionsSerializer, ConstractorPrescriptionsUpddateSerializer
 
 
 class ContractorsPrescriptionCountView(APIView):
@@ -117,10 +117,23 @@ class ContractorsPrescriptionUserView(APIView):
         responses={200: ConstractorPrescriptionsSerializer(many=True)}
     )
     def get(self, request, pk):
-        instance = get_object_or_404(PrescriptionContractor, prescription=pk).order_by('-id')
+        instance = get_object_or_404(PrescriptionContractor, prescription=pk)
 
-        serializer = ConstractorPrescriptionsSerializer(instance, many=True, context={'request': request})
+        serializer = ConstractorPrescriptionsSerializer(instance, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(
+        tags=['Prescription Contractors'],
+        request_body=ConstractorPrescriptionsUpddateSerializer
+    )
+    def put(self, request, pk):
+        instance = get_object_or_404(PrescriptionContractor, prescription=pk)
+        # Make sure to check that data is not a list, but a dictionary
+        serializer = ConstractorPrescriptionsUpddateSerializer(instance=instance, data=request.data, context={'owner':request.user, 'request': request}, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContractorsPrescriptionView(APIView):

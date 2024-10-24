@@ -51,7 +51,7 @@ class ConstractorPrescriptionsUpddateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PrescriptionContractor
-        fields = ['id', 'prescription', 'user']
+        fields = ['id', 'prescription', 'user', 'status']
 
     def update(self, instance, validated_data):
         instance.user = validated_data.get('user', instance.user)

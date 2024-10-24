@@ -17,7 +17,7 @@ from admin_account.project.views import AdminProjectsSerializer
 from prescription.models import Prescriptions, PrescriptionContractor
 from prescription.customer.serializers import CustomerPrescriptionsSerializers
 from prescription.admin_acc.serializers import AdminPrescriptionSerializers
-from prescription.constractor_app.serializers import ConstractorPrescriptionsSerializer
+from prescription.constractor_app.serializers import ConstractorPrescriptionsSerializer, ConstractorPrescriptionsUpddateSerializer
 
 
 class AdminPrescriptionsView(APIView):
@@ -46,21 +46,21 @@ class AdminPrescriptionView(APIView):
 
     @swagger_auto_schema(
         tags=['Prescription Admin'],
-        responses={200: CustomerPrescriptionsSerializers(many=False)},
+        responses={200: ConstractorPrescriptionsSerializer(many=False)},
     )
     def get(self, request, pk):
-        instances = get_object_or_404(Prescriptions, id=pk)
-        serializer = CustomerPrescriptionsSerializers(instances, context={'request':request})
+        instances = get_object_or_404(PrescriptionContractor, id=pk)
+        serializer = ConstractorPrescriptionsSerializer(instances, context={'request':request})
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     @swagger_auto_schema(
         tags=['Prescription Admin'],
-        request_body=AdminPrescriptionSerializers
+        request_body=ConstractorPrescriptionsUpddateSerializer
     )
     def put(self, request, pk):
         instance = Prescriptions.objects.filter(id=pk)[0]
         # Make sure to check that data is not a list, but a dictionary
-        serializer = AdminPrescriptionSerializers(instance=instance, data=request.data, context={'owner':request.user, 'request': request}, partial=True)
+        serializer = ConstractorPrescriptionsUpddateSerializer(instance=instance, data=request.data, context={'owner':request.user, 'request': request}, partial=True)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

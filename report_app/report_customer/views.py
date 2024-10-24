@@ -3,6 +3,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -93,7 +94,7 @@ class CustomerReportsView(APIView):
         operation_summary='Submitted reports'
     )
     def get(self, request):
-        instances = ReportsName.objects.filter(customer=request.user).order_by('-id')
+        instances = ReportsName.objects.filter(Q(customer=request.user) | Q(status_customer=1)).order_by('-id')
         # Query parametrlardan 'status_customer' qiymatini olish
         status = request.query_params.get('status')
 
@@ -102,7 +103,7 @@ class CustomerReportsView(APIView):
             try:
                 # status_customer ni int ga aylantirish
                 status_customer_id = int(status)
-                instances = instances.filter(status=status_customer_id)
+                instances = instances.filter(status_customer=status_customer_id)
             except ValueError:
                 return Response({"error": "Invalid status id"}, status=status.HTTP_400_BAD_REQUEST)
 

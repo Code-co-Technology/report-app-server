@@ -1,4 +1,5 @@
 from rest_framework import status
+from django.db.models import Q
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -107,8 +108,8 @@ class ContractorReportReturnView(APIView):
         paginated_instances = paginator.paginate_queryset(instances, request)
         serializer = ReportsNamesSerializer(paginated_instances, many=True, context={'request':request})
         return paginator.get_paginated_response(serializer.data)
-    
-from django.db.models import Q
+
+
 class ContractorReportsView(APIView):
     render_classes = [UserRenderers]
     authentication_classes = [JWTAuthentication]

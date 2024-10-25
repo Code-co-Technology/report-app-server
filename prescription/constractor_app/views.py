@@ -117,7 +117,7 @@ class ContractorsPrescriptionUserView(APIView):
         responses={200: ConstractorPrescriptionsSerializer(many=True)}
     )
     def get(self, request, pk):
-        instance = get_object_or_404(PrescriptionContractor, prescription=pk)
+        instance = get_object_or_404(PrescriptionContractor, id=pk)
 
         serializer = ConstractorPrescriptionsSerializer(instance, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -127,7 +127,7 @@ class ContractorsPrescriptionUserView(APIView):
         request_body=ConstractorPrescriptionsUpddateSerializer
     )
     def put(self, request, pk):
-        instance = get_object_or_404(PrescriptionContractor, prescription=pk)
+        instance = get_object_or_404(PrescriptionContractor, id=pk)
         # Make sure to check that data is not a list, but a dictionary
         serializer = ConstractorPrescriptionsUpddateSerializer(instance=instance, data=request.data, context={'owner':request.user, 'request': request}, partial=True)
         if serializer.is_valid(raise_exception=True):

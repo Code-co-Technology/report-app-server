@@ -23,11 +23,12 @@ class ConstractorPrescriptionSerializer(serializers.ModelSerializer):
         }
     
     def get_owner(self, obj):
-        full_name = obj.owner.first_name + ' ' + obj.owner.last_name
-        return {
-            'name': full_name
-        }
-
+        if obj.owner:
+            full_name = obj.owner.first_name + ' ' + obj.owner.last_name
+            return {
+                'name': full_name
+            }
+        return None
 
 class ConstractorPrescriptionsSerializer(serializers.ModelSerializer):
     prescription = ConstractorPrescriptionSerializer(read_only=True)
@@ -40,9 +41,11 @@ class ConstractorPrescriptionsSerializer(serializers.ModelSerializer):
         fields = ['id', 'prescription', 'contractor', 'user', 'status']
 
     def get_user(self,obj):
-        return {
-            "full_name": obj.user.first_name + ' ' + obj.user.last_name
-        }
+        if obj.user:
+            return {
+                "full_name": obj.user.first_name + ' ' + obj.user.last_name
+            }
+        return None
 
 
 

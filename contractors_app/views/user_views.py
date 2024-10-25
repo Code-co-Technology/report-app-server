@@ -54,7 +54,7 @@ class ContractorUsersView(APIView):
         operation_description='Contractor employees arrive. Filters can be applied based on search query, active profile status, and user role.'
     )
     def get(self, request):
-        instances = CustomUser.objects.filter(company=request.user.company, groups__name__in=['contractors', 'user']).order_by('-id')
+        instances = CustomUser.objects.filter(company=request.user.company, groups__name__in=['user']).order_by('-id')
         filters = Q()
 
         # Filter by activate_profile if provided and it's a valid boolean

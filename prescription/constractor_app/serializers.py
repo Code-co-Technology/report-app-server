@@ -3,28 +3,23 @@ from rest_framework import serializers
 from authen.serializers import UserInformationSerializer, UserInformationContractorSerializer
 from admin_account.project.serializers import AdminProjectsSerializer
 from prescription.models import Prescriptions, PrescriptionsComment, PrescriptionContractor
-from prescription.customer.serializers import TypeOFViolationSerializer
+from prescription.customer.serializers import TypeOFViolationSerializer, PrescriptionsImageSerializer, PrescriptionsCommentSerializer
 
 
 class ConstractorPrescriptionSerializer(serializers.ModelSerializer):
-    project_prescription = serializers.SerializerMethodField()
-    status = serializers.CharField(source='get_status_display')
+    project = serializers.SerializerMethodField()
     owner = serializers.SerializerMethodField()
+    prescription_image = PrescriptionsImageSerializer(many=True)
+    prescription_comment = PrescriptionsCommentSerializer(many=True)
     type_violation = TypeOFViolationSerializer(many=True)
 
     class Meta:
         model = Prescriptions
-        fields = ['id', 'project_prescription', 'type_violation', 'deadline', 'status', 'owner', 'create_at']
+        fields = ['id', 'type_violation', 'project', 'deadline', 'prescription_image', 'prescription_comment', 'owner']
     
-    def get_project_prescription(self, obj):
+    def get_project(self, obj):
         return {
-            'address': obj.project.address,
-        }
-    
-    def get_owner(self, obj):
-        return {
-            'first_name': obj.owner.first_name,
-            'last_name': obj.owner.last_name,
+            'create_at': obj.project.opening_date,
         }
 
 

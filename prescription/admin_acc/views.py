@@ -16,7 +16,7 @@ from admin_account.project.views import AdminProjectsSerializer
 
 from prescription.models import Prescriptions, PrescriptionContractor
 from prescription.customer.serializers import CustomerPrescriptionsSerializers
-from prescription.admin_acc.serializers import AdminPrescriptionSerializers
+from prescription.admin_acc.serializers import AdminPrescriptionSerializers, AdminPrescriptionsUserSerializer
 from prescription.constractor_app.serializers import ConstractorPrescriptionsSerializer, ConstractorPrescriptionsUpddateSerializer
 
 
@@ -28,14 +28,14 @@ class AdminPrescriptionsView(APIView):
 
     @swagger_auto_schema(
         tags=['Prescription Admin'],
-        responses={200: ConstractorPrescriptionsSerializer(many=True)}
+        responses={200: AdminPrescriptionsUserSerializer(many=True)}
     )
     def get(self, request):
         instance = PrescriptionContractor.objects.all().order_by('-id')
         # Pagination logic
         paginator = self.pagination_class()
         paginated_instances = paginator.paginate_queryset(instance, request)
-        serializer = ConstractorPrescriptionsSerializer(paginated_instances, many=True, context={'request':request})
+        serializer = AdminPrescriptionsUserSerializer(paginated_instances, many=True, context={'request':request})
         return paginator.get_paginated_response(serializer.data)
 
 
@@ -46,21 +46,21 @@ class AdminPrescriptionView(APIView):
 
     @swagger_auto_schema(
         tags=['Prescription Admin'],
-        responses={200: ConstractorPrescriptionsSerializer(many=False)},
+        responses={200: AdminPrescriptionsUserSerializer(many=False)},
     )
     def get(self, request, pk):
         instances = get_object_or_404(PrescriptionContractor, id=pk)
-        serializer = ConstractorPrescriptionsSerializer(instances, context={'request':request})
+        serializer = AdminPrescriptionsUserSerializer(instances, context={'request':request})
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     @swagger_auto_schema(
         tags=['Prescription Admin'],
-        request_body=ConstractorPrescriptionsUpddateSerializer
+        request_body=AdminPrescriptionSerializers
     )
     def put(self, request, pk):
         instance = Prescriptions.objects.filter(id=pk)[0]
         # Make sure to check that data is not a list, but a dictionary
-        serializer = ConstractorPrescriptionsUpddateSerializer(instance=instance, data=request.data, context={'owner':request.user, 'request': request}, partial=True)
+        serializer = PrescriptionContractor(instance=instance, data=request.data, context={'owner':request.user, 'request': request}, partial=True)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

@@ -31,16 +31,64 @@ class PrescriptionsCommentSerializer(serializers.ModelSerializer):
 
 
 class CustomerPrescriptionsSerializers(serializers.ModelSerializer):
-    project = AdminProjectsSerializer(read_only=True)
-    owner = UserInformationCustomerSerializer(read_only=True)
-    type_violation = TypeOFViolationSerializer(many=True)
+    project = serializers.SerializerMethodField()
+    owner = serializers.SerializerMethodField()
     prescription_image = PrescriptionsImageSerializer(many=True)
     prescription_comment = PrescriptionsCommentSerializer(many=True)
-    status = serializers.CharField(source='get_status_display')
+    type_violation = TypeOFViolationSerializer(many=True)
 
     class Meta:
         model = Prescriptions
-        fields = ['id', 'status', 'project', 'type_violation', 'deadline', 'owner', 'prescription_image', 'prescription_comment', 'create_at']
+        fields = ['id', 'type_violation', 'project', 'deadline', 'prescription_image', 'prescription_comment', 'owner']
+    
+    def get_project(self, obj):
+        return {
+            'create_at': obj.project.opening_date,
+        }
+    
+    def get_owner(self, obj):
+        full_name = obj.owner.first_name + ' ' + obj.owner.last_name
+        return {
+            'name': full_name
+        }
+
+
+class CustomerPrescriptionsUserSerializer(serializers.ModelSerializer):
+    prescription = CustomerPrescriptionsSerializers(read_only=True)
+    contractor = UserInformationContractorSerializer(read_only=True)
+    status = serializers.CharField(source='get_status_display')
+
+    class Meta:
+        model = PrescriptionContractor
+        fields = ['id', 'prescription', 'contractor', 'status']
+
+
+class CustomerPrescriptionsCommentSerializer(serializers.ModelSerializer):
+    prescription_comment = serializers.ListField(child = serializers.CharField(max_length = 1000000),
+        write_only=True, required=False)
+    prescription = serializers.IntegerField(write_only=True, required=False)
+
+    class Meta:
+        model = PrescriptionContractor
+        fields = ['id', 'prescription', 'prescription_comment']
+
+    def update(self, instance, validated_data):
+        prescription_comment = validated_data.pop('prescription_comment', [])
+        prescription = validated_data.pop('prescription', None)
+        owner = self.context.get('owner')
+        
+        if prescription:
+            try:
+                prescription = Prescriptions.objects.get(id=prescription)
+            except Prescriptions.DoesNotExist:
+                raise serializers.ValidationError("The provided prescription does not exist.")
+        else:
+            prescription = None
+        for comment_text in prescription_comment:
+            PrescriptionsComment.objects.create(prescription=prescription, owner=owner, comment=comment_text)
+
+        return instance
+
 
 
 class CustomerPrescriptionSerializers(serializers.ModelSerializer):

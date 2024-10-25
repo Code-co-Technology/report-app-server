@@ -16,8 +16,23 @@ from authen.serializers import UserInformationContractorSerializer
 from admin_account.models import Project
 from admin_account.project.views import AdminProjectsSerializer
 
-from prescription.models import TypeOfViolation, Prescriptions
-from prescription.customer.serializers import TypeOFViolationSerializer, CustomerPrescriptionsSerializers, CustomerPrescriptionSerializers
+from prescription.models import TypeOfViolation, Prescriptions, PrescriptionContractor
+from prescription.customer.serializers import TypeOFViolationSerializer, CustomerPrescriptionsSerializers, CustomerPrescriptionSerializers, CustomerPrescriptionsUserSerializer, CustomerPrescriptionsCommentSerializer
+
+
+class CustumerPrescriptionCountView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsCustomer]
+
+    @swagger_auto_schema(
+        tags=['Prescription Customer'],
+        responses={200: UserInformationContractorSerializer(many=True)},
+    )
+    def get(self, request):
+        eliminated = PrescriptionContractor.objects.filter(prescription__owner=request.user, status=2).count()
+        expired = PrescriptionContractor.objects.filter(prescription__owner=request.user, status=3).count()
+        return Response({'eliminated':eliminated, 'expired':expired}, status=status.HTTP_200_OK)
 
 
 class CustumerContraCountUsersView(APIView):
@@ -73,14 +88,14 @@ class UstumerPrescriptionsView(APIView):
 
     @swagger_auto_schema(
         tags=['Prescription Customer'],
-        responses={200: CustomerPrescriptionsSerializers(many=True)}
+        responses={200: CustomerPrescriptionsUserSerializer(many=True)}
     )
     def get(self, request):
-        instance = Prescriptions.objects.filter(owner=request.user).order_by('-id')
+        instance = PrescriptionContractor.objects.filter(prescription__owner=request.user).order_by('-id')
         # Pagination logic
         paginator = self.pagination_class()
         paginated_instances = paginator.paginate_queryset(instance, request)
-        serializer = CustomerPrescriptionsSerializers(paginated_instances, many=True, context={'request':request})
+        serializer = CustomerPrescriptionsUserSerializer(paginated_instances, many=True, context={'request':request})
         return paginator.get_paginated_response(serializer.data)
 
     @swagger_auto_schema(
@@ -95,6 +110,35 @@ class UstumerPrescriptionsView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+
+class UstumerPrescriptionCommentView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsCustomer]
+
+    @swagger_auto_schema(
+        tags=['Prescription Customer'],
+        responses={200: CustomerPrescriptionsUserSerializer(many=False)},
+    )
+    def get(self, request, pk):
+        instances = get_object_or_404(PrescriptionContractor, id=pk)
+        serializer = CustomerPrescriptionsUserSerializer(instances, context={'request':request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(
+        tags=['Prescription Customer'],
+        request_body=CustomerPrescriptionsCommentSerializer
+    )
+    def put(self, request, pk):
+        instance = get_object_or_404(PrescriptionContractor, id=pk)
+        # Make sure to check that data is not a list, but a dictionary
+        serializer = CustomerPrescriptionsCommentSerializer(instance=instance, data=request.data, context={'owner':request.user, 'request': request}, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
 class UstumerPrescriptionView(APIView):
     render_classes = [UserRenderers]

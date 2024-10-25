@@ -22,10 +22,10 @@ class Prescriptions(models.Model):
     deadline = models.DateField(null=True, blank=True, verbose_name='Срок устранения')
     STATUS = (
         (1, 'В обработке'),
-        (3, 'Устранено'),
-        (4, 'Просрочено'),
-        (5, 'Новый'),
-        (6, 'Null'),
+        (2, 'Устранено'),
+        (3, 'Просрочено'),
+        (4, 'Новый'),
+        (5, 'Null'),
     ) 
     status = models.IntegerField(choices=STATUS, default=1, verbose_name='Статус')
     contractors = models.ManyToManyField(CustomUser, through='PrescriptionContractor', through_fields=('prescription', 'contractor'), related_name='contractor_prescriptions', verbose_name='Подрядчики') 

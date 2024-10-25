@@ -29,7 +29,7 @@ urlpatterns = [
     # Constractor
     path('prescription/contractor/count/', ContractorsPrescriptionCountView.as_view()),
     path('prescription/contractor/', ContractorsPrescriptionsView.as_view()),
-    path('prescription/contractor/<int:pk>/', ContractorsPrescriptionView.as_view()),
+    path('prescription/contractor/<int:pk>/', ContractorsPrescriptionUserView.as_view()),
     path('prescription/new/contractor/', ContractorsPrescriptionNewView.as_view()),
     path('prescription/liminate/contractor/', ContractorsPrescriptioneliminatedView.as_view()),
     path('prescription/expired/contractor/', ContractorsPrescriptioneExpiredView.as_view()),

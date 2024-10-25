@@ -45,6 +45,13 @@ class AdminPrescriptionSerializers(serializers.ModelSerializer):
         fields = ['id', 'status']
     
     def update(self, instance, validated_data):
-        instance.status = validated_data.get('status', instance.status)
+        status_value = validated_data.get('status', None)
+    
+        if status_value is not None and status_value in dict(Prescriptions.STATUS).keys():
+            instance.status = status_value
+        else:
+            raise ValueError("Status noto'g'ri qiymatga ega!")
+        
+        instance.save()
 
         return instance

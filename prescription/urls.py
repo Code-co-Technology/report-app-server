@@ -1,7 +1,7 @@
 from django.urls import path
 from prescription.customer.views import (
     CustomerProjectView, CustomerTypeOfViolationView,
-    UstumerPrescriptionsView, UstumerPrescriptionView, CustumerContraCountUsersView, UstumerPrescriptionCommentView
+    UstumerPrescriptionsView, UstumerPrescriptionView, CustumerContraCountUsersView, UstumerPrescriptionCommentView, CustumerPrescriptionCountView
 )
 from prescription.admin_acc.views import AdminPrescriptionsView, AdminPrescriptionView
 from prescription.constractor_app.views import (
@@ -18,7 +18,7 @@ urlpatterns = [
     # Customer
     path('prescription/customer/projects/', CustomerProjectView.as_view()),
     path('prescription/customer/type_violation/', CustomerTypeOfViolationView.as_view()),
-    path('prescription/customer/count/', CustumerContraCountUsersView.as_view()),
+    path('prescription/customer/count/', CustumerPrescriptionCountView.as_view()),
     path('prescription/customer/', UstumerPrescriptionsView.as_view()),
     path('prescription/customer/<int:pk>/', UstumerPrescriptionView.as_view()),
     path('prescription/customer/comment/<int:pk>/', UstumerPrescriptionCommentView.as_view()),

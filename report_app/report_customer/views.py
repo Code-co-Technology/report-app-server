@@ -109,7 +109,7 @@ class CustomerReportView(APIView):
     def put(self, request, pk):
         instance = get_object_or_404(ReportsName, id=pk)
         # Make sure to check that data is not a list, but a dictionary
-        serializer = ReportsNameCustomerSerializer(instance=instance, data=request.data, context={'request': request}, partial=True)
+        serializer = ReportsNameCustomerSerializer(instance=instance, data=request.data, context={'customer': request.user, 'request': request}, partial=True)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

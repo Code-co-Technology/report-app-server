@@ -2,6 +2,7 @@ import json
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 
+from authen.models import CustomUser
 from report_app.models import ReportsName, Reports, RespostComment, Bob, TypeWork, ReportFile
 
 
@@ -94,7 +95,7 @@ class ReportsNameCustomerSerializer(serializers.ModelSerializer):
         return reports_name
 
     def update(self, instance, validated_data):
-        customer = self.context.get('customer')
+        
         # resposts ma'lumotlarini validated_data'dan ajratish
         resposts_data = self.initial_data.get('resposts', '[]')
         try:
@@ -103,13 +104,18 @@ class ReportsNameCustomerSerializer(serializers.ModelSerializer):
             resposts_data = []
         comment_data = validated_data.pop('respost_comment', None)
 
+        customer = self.context.get('customer')
+        if not isinstance(customer, CustomUser):
+            raise ValueError("Customer must be a CustomUser instance")
+
+
         # ReportsName ma'lumotlarini yangilash
         instance.name = validated_data.get('name', instance.name)
         instance.status_user = validated_data.get('status_user', instance.status_user)
         instance.status_contractor = validated_data.get('status_contractor', instance.status_contractor)
         instance.status_customer = validated_data.get('status_customer', instance.status_customer)
         instance.status = validated_data.get('status', instance.status)
-        instance.customer = self.context.get('customer')
+        instance.customer = customer
         instance.save()
 
         # Resposts'larni yangilash yoki qo'shish
@@ -167,7 +173,6 @@ class ReportsNameCustomerSerializer(serializers.ModelSerializer):
         # Kommentlarni yangilash yoki qo'shish
         if comment_data:
             existing_comments = {comment.id: comment for comment in instance.respost_comment.all()}
-            customer = self.context.get('customer')
             for comment_data_item in comment_data:
                 comment_id = comment_data_item.get('id', None)
 

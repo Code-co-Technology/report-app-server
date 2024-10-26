@@ -18,7 +18,7 @@ from admin_account.project.views import AdminProjectsSerializer
 
 from prescription.models import TypeOfViolation, Prescriptions, PrescriptionContractor
 from prescription.customer.serializers import TypeOFViolationSerializer, CustomerPrescriptionsSerializers, CustomerPrescriptionSerializers, CustomerPrescriptionsUserSerializer, CustomerPrescriptionsCommentSerializer
-
+from django.db.models import Q
 
 class CustumerPrescriptionCountView(APIView):
     render_classes = [UserRenderers]
@@ -30,8 +30,8 @@ class CustumerPrescriptionCountView(APIView):
         responses={200: UserInformationContractorSerializer(many=True)},
     )
     def get(self, request):
-        eliminated = PrescriptionContractor.objects.filter(prescription__owner=request.user, status=2).count()
-        expired = PrescriptionContractor.objects.filter(prescription__owner=request.user, status=3).count()
+        eliminated = PrescriptionContractor.objects.filter(Q(prescription__owner=request.user) | Q(status=2)).count()
+        expired = PrescriptionContractor.objects.filter(Q(prescription__owner=request.user) | Q(status=2)).count()
         return Response({'eliminated':eliminated, 'expired':expired}, status=status.HTTP_200_OK)
 
 

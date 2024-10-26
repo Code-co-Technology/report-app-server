@@ -18,7 +18,7 @@ urlpatterns = [
     # Customer
     path('prescription/customer/projects/', CustomerProjectView.as_view()),
     path('prescription/customer/type_violation/', CustomerTypeOfViolationView.as_view()),
-    path('prescription/customer/contractors/', CustumerContraCountUsersView.as_view()),
+    path('prescription/customer/count/', CustumerContraCountUsersView.as_view()),
     path('prescription/customer/', UstumerPrescriptionsView.as_view()),
     path('prescription/customer/<int:pk>/', UstumerPrescriptionView.as_view()),
     path('prescription/customer/comment/<int:pk>/', UstumerPrescriptionCommentView.as_view()),

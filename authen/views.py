@@ -101,7 +101,7 @@ class UserSignIn(APIView):
                 return Response(tokens, status=status.HTTP_200_OK)
             else:
                 return Response(
-                    {'error': "Этот пользователь недоступен для системы"}, 
+                    {'error': "Такого пользователя не существует! Электронная почта или пароль неверны"}, 
                     status=status.HTTP_404_NOT_FOUND
                 )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

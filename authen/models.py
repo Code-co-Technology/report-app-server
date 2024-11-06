@@ -46,7 +46,9 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(unique=True, verbose_name="E-mail")
+    email = models.EmailField(unique=True, verbose_name="E-mail", error_messages={
+        'required': 'Электронная почта обязателен для заполнения.'
+    })
     username = models.CharField(max_length=30, null=True, blank=True, unique=True, verbose_name="Логин")
     first_name = models.CharField(max_length=255, null=True, blank=True, verbose_name="Имя")
     last_name = models.CharField(max_length=255, null=True, blank=True, verbose_name="Фамилия")

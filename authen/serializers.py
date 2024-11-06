@@ -45,7 +45,14 @@ class UserSignUpSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=255, read_only=True) 
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     confirm_password = serializers.CharField(write_only=True, required=True)
-    email = serializers.EmailField(validators=[UniqueValidator(queryset=CustomUser.objects.all())])
+    email = serializers.EmailField(
+        validators=[
+            UniqueValidator(
+                queryset=CustomUser.objects.all(), 
+                message='Электронная почта должна быть уникальной. Этот адрес электронной почты принадлежит другому пользователю.'
+            )
+        ]
+    )
     # Company fields for user registration
     name_company = serializers.CharField(max_length=250, required=False, allow_blank=True)
     inn_company = serializers.CharField(max_length=250, required=False, allow_blank=True)
@@ -68,33 +75,28 @@ class UserSignUpSerializer(serializers.ModelSerializer):
         return value
     
     def validate(self, attrs):
-        email = attrs.get('email')
-        phone = attrs.get('phone')
         name_company = attrs.get('name_company')
         inn_company = attrs.get('inn_company')
         ogrn = attrs.get('ogrn')
 
-        if CustomUser.objects.filter(email=email).exists():
-            raise serializers.ValidationError({'error': 'Электронная почта должна быть уникальной. Этот адрес электронной почты принадлежит другому пользователю.'})
-
-        if CustomUser.objects.filter(phone=phone).exists():
-            raise serializers.ValidationError({'error': 'Номер телефона должен быть уникальным. Этот номер телефона принадлежит другому пользователю.'})
-
         if name_company and Company.objects.filter(name_company=name_company).exists():
             raise serializers.ValidationError({'error': 'Название компании должно быть уникальным.'})
+
 
         if inn_company and Company.objects.filter(inn_company=inn_company).exists():
             raise serializers.ValidationError({'error': 'ИНН должен быть уникальным.'})
 
+
         if ogrn and Company.objects.filter(ogrn=ogrn).exists():
             raise serializers.ValidationError({'error': 'ОГРН должен быть уникальным.'})
+
 
         return attrs
 
     def create(self, validated_data):
 
         if validated_data['password'] != validated_data['confirm_password']:
-            raise serializers.ValidationError({'error': 'Эти пароли не совпадают.'})
+            raise serializers.ValidationError({'error': ['Пароль и пароль подтверждения должны совпадать.']})
 
         validated_data.pop('confirm_password')
         email = validated_data.get('email')
@@ -123,56 +125,63 @@ class UserSignUpSerializer(serializers.ModelSerializer):
 
 
 class UserCustumerRegisterSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(max_length=50, validators=[
-            MaxLengthValidator(limit_value=50, message='Имя не может превышать 50 символов.')],)
-    last_name = serializers.CharField(max_length=50, validators=[
-            MaxLengthValidator(limit_value=50, message='фамиля не может превышать 50 символов.')],)
-    username = serializers.CharField(max_length=255, read_only=True) 
+    first_name = serializers.CharField(max_length=50, validators=[MaxLengthValidator(limit_value=50, message='Имя не может превышать 50 символов.')])
+    last_name = serializers.CharField(max_length=50, validators=[MaxLengthValidator(limit_value=50, message='фамиля не может превышать 50 символов.')])
+    username = serializers.CharField(max_length=255, read_only=True)
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     confirm_password = serializers.CharField(write_only=True, required=True)
-    email = serializers.EmailField(validators=[UniqueValidator(queryset=CustomUser.objects.all())])
-
+    email = serializers.EmailField(
+        required=True,
+        error_messages={
+            'required': 'Электронная почта обязательна для заполнения.',
+            'invalid': 'Неверный формат электронной почты.',
+        }
+    )
+    
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone', 'password', 'confirm_password']
-        extra_kwargs = {'first_name': {'required': True}, 'last_name': {'required': True}}
+    
+    def validate_email(self, value):
+        if not value:
+            raise serializers.ValidationError("Электронная почта обязательна.")
+        
+        # Check if email is unique
+        if CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Электронная почта должна быть уникальной. Этот адрес уже занят другим пользователем.")
+        
+        return value
+
+    def validate_phone(self, value):
+        if not value:
+            raise serializers.ValidationError("Телефон обязателен для заполнения.")
+        return value
 
     def validate_password(self, value):
-
         try:
             validate_password(value)
         except ValidationError as exc:
             raise serializers.ValidationError(str(exc))
-
         return value
-    
-    def validate(self, attrs):
-        email = attrs.get('email')
-        phone = attrs.get('phone')
-
-        if CustomUser.objects.filter(email=email).exists():
-            raise serializers.ValidationError({'error': 'Электронная почта должна быть уникальной. Этот адрес электронной почты принадлежит другому пользователю.'})
-
-        if CustomUser.objects.filter(phone=phone).exists():
-            raise serializers.ValidationError({'error': 'Номер телефона должен быть уникальным. Этот номер телефона принадлежит другому пользователю.'})
-
-        return attrs
 
     def create(self, validated_data):
-
         if validated_data['password'] != validated_data['confirm_password']:
-            raise serializers.ValidationError({'error': 'Эти пароли не совпадают.'})
+            raise serializers.ValidationError({'error': ['Пароль и пароль подтверждения должны совпадать.']})
 
         validated_data.pop('confirm_password')
         email = validated_data.get('email')
         username = email.split("@")[0]
 
-        create = get_user_model().objects.create_user(username=username, **validated_data)
+        # Create the user
+        user = get_user_model().objects.create_user(username=username, **validated_data)
 
+        # Assign the user to the 'customer' group
         groups_data = Group.objects.get(name='customer')
-        create.groups.add(groups_data)
+        user.groups.add(groups_data)
 
-        return create
+        return user
+
+
 
 
 class UserSigInSerializer(serializers.ModelSerializer):

@@ -63,7 +63,7 @@ class ContractorAddUserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         if validated_data['password'] != validated_data['confirm_password']:
-            raise serializers.ValidationError({'error': 'Эти пароли не совпадают.'})
+            raise serializers.ValidationError({'error': ['Пароль и пароль подтверждения должны совпадать.']})
 
         validated_data.pop('confirm_password')
         groups_data = validated_data.pop('groups', [])

@@ -117,27 +117,12 @@ class AdminCreateProjectSerializer(serializers.ModelSerializer):
         contractors_data = validated_data.pop('contractor', [])
         if contractors_data:
             contractors_data = json.loads(contractors_data) 
-        deadline = validated_data.get('submission_deadline')
         status_project = ProjectStatus.objects.get(name='В обработке')
         project = Project.objects.create(**validated_data)
         project.status = status_project
         project.owner = self.context.get('owner')
         project.save()
 
-        if contractors_data:
-            presc = Prescriptions.objects.create(
-                project=project,
-                deadline=deadline,
-                status=1,
-                owner=self.context.get('owner')
-            )
-            for contractor_id in contractors_data:
-                contractor = CustomUser.objects.get(id=contractor_id)  # Get the CustomUser instance
-                PrescriptionContractor.objects.create(
-                    prescription=presc,
-                    contractor=contractor,  # Now contractor is a CustomUser instance
-                    status=1  # Default status for contractors
-                )
         # Handle ProjectImage creation
         for image_data in images_data:
             ProjectImage.objects.create(project=project, image=image_data)
@@ -145,6 +130,10 @@ class AdminCreateProjectSerializer(serializers.ModelSerializer):
         # Handle ProjectSmeta creation
         for file_data in files_data:
             ProjectSmeta.objects.create(project=project, files=file_data)
+
+        if contractors_data:
+            contractors = CustomUser.objects.filter(id__in=contractors_data)
+            project.contractor.set(contractors)
 
         return project
 

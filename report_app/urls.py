@@ -1,6 +1,6 @@
 from django.urls import path
 
-from report_app.reports.views import BobView, TypeOfWorkView, RepostsFileDetaileView
+from report_app.reports.views import BobView, TypeOfWorkView, RepostsFileDetaileView, ReportProjectView
 from report_app.report_user.views import (
     UserReportReceivedView, UserReportReturnView,
     UserReportsView, UserReportView, UserReportCount
@@ -19,6 +19,7 @@ urlpatterns = [
     # Reports
     path('report/section/', BobView.as_view()),
     path('report/type_work/', TypeOfWorkView.as_view()),
+    path('report/projects/', ReportProjectView.as_view()),
     path('report/files/<int:pk>/', RepostsFileDetaileView.as_view()),
     # User Reports
     path('report/user/count/', UserReportCount.as_view()),

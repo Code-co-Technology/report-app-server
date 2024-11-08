@@ -10,8 +10,25 @@ from utils.pagination import PaginationList
 from utils.renderers import UserRenderers
 from utils.permissions import IsLogin
 
+from admin_account.models import Project
 from report_app.models import Bob, TypeWork, ReportFile
-from report_app.reports.serializers import BobSerializers, TypeOfWorkSerializer, RepostFileUpdateSerializer, RepostFileSerializer
+from report_app.reports.serializers import BobSerializers, TypeOfWorkSerializer, RepostFileUpdateSerializer, RepostFileSerializer, ProjectReportSerializer
+
+
+class ReportProjectView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsLogin]
+
+    @swagger_auto_schema(
+        tags=['Report'],
+        responses={200: ProjectReportSerializer(many=True)},
+        operation_summary='Section Reports'
+    )
+    def get(self, request):
+        instances = Project.objects.filter(status__id=1).order_by('-id')
+        serializer = ProjectReportSerializer(instances, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class BobView(APIView):

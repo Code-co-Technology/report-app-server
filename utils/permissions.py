@@ -23,13 +23,13 @@ class IsCustomer(BasePermission):
 class IsContractors(BasePermission):
     """Rights only for contractors"""
     def has_permission(self, request, view):
-        return (request.user.is_authenticated and request.user.groups.filter(name='contractors').exists())
+        return request.user.is_authenticated and request.user.groups.filter(name='contractors').exists()
 
 
 class IsUser(BasePermission):
     """Rights only for user"""
     def has_permission(self, request, view):
-        return (request.user.is_authenticated and request.user.groups.filter(name='user').exists())
+        return request.user.is_authenticated and request.user.groups.filter(name='user').exists()
 
 
 class IsLogin(BasePermission):

@@ -82,10 +82,11 @@ class AdminContractorUserUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'activate_profile', 'overdue', 'failed_reports', 'penalty', 'block_contractor', 'block_sending_report']
+        fields = ['id', 'summ', 'activate_profile', 'overdue', 'failed_reports', 'penalty', 'block_contractor', 'block_sending_report']
     
     def update(self, instance, validated_data):
         # Update user fields
+        instance.summ = validated_data.get('summ', instance.summ)
         instance.activate_profile = validated_data.get('activate_profile', instance.activate_profile)
         instance.overdue = validated_data.get('overdue', instance.overdue)
         instance.failed_reports = validated_data.get('failed_reports', instance.failed_reports)

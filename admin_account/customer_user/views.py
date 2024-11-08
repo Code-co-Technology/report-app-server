@@ -100,3 +100,9 @@ class AdminCustumerUserView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(tags=['Auth'], responses={204:  'No Content'})
+    def delete(self, request, pk):
+        user_delete = CustomUser.objects.get(id=pk)
+        user_delete.delete()
+        return Response({"message": "delete success"}, status=status.HTTP_204_NO_CONTENT)

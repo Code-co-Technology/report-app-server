@@ -60,6 +60,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     activate_profile = models.BooleanField(default=False, verbose_name="Активировать профиль")
     overdue = models.ForeignKey(Overdue, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Просрочка. Для подрядчика')
     failed_reports = models.ForeignKey(FailedReports, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Проваленные отчеты. Для подрядчика')
+    summ = models.FloatField(null=True, blank=True, verbose_name='Сумма штрафа')
     penalty = models.BooleanField(default=False, verbose_name='Штраф. Для подрядчика')
     block_contractor = models.BooleanField(default=False, verbose_name='Заблокировать подрядчика. Для подрядчика')
     block_sending_report = models.BooleanField(default=False, verbose_name='Заблокировать отправку  отчето. Для подрядчика')

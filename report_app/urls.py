@@ -12,7 +12,7 @@ from report_app.report_customer.views import (
     CusntomerReporCountView, 
     CustomerReportsView, CustomerReportView
 )
-from report_app.report_admin.views import AdminReportsView, AdminReportView
+from report_app.report_admin.views import AdminReportsView, AdminReportView, AdminOwnerReportView
 
 
 urlpatterns = [
@@ -36,6 +36,7 @@ urlpatterns = [
     path('report/customer/<int:pk>/', CustomerReportView.as_view()),
     # Admin Resports
     path('report/admin/', AdminReportsView.as_view()),
+    path('report/admin/owner/report/<int:pk>/', AdminOwnerReportView.as_view()),
     path('report/admin/<int:pk>/', AdminReportView.as_view()),
 
 ]

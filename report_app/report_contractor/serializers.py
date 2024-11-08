@@ -23,6 +23,7 @@ class ResportconstructorSerializer(serializers.ModelSerializer):
                'bob', 
                'type_work', 
                'position',
+              'unity',
                'quantity',
                'frame',
                'floor',
@@ -42,7 +43,7 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ReportsName
-        fields = ['id', 'name', 'project',  'respost_comment', 'status_user', 'status_contractor', 'report_file', 'status_customer', 'resposts', 'constructor', 'create_at']
+        fields = ['id', 'name', 'project',  'respost_comment', 'status_user', 'status_contractor', 'report_file', 'status_customer', 'resposts', 'constructor', 'company', 'create_at']
 
     def create(self, validated_data):
         constructor = self.context.get('constructor')
@@ -59,6 +60,7 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
         
         # Foydalanuvchini context orqali bog'lab qo'shish
         reports_name.constructor = self.context.get('constructor')
+        reports_name.company = self.context.get('company')
         reports_name.status_contractor = 2
         reports_name.status_customer = 1
         reports_name.save()
@@ -77,7 +79,6 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
             
             bob = get_object_or_404(Bob, id=bob_id)
             type_work = get_object_or_404(TypeWork, id=type_work_id)
-            print(bob)
             
             if index < len(respost_image):
                 report_file = respost_image[index]

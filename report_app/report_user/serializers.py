@@ -28,6 +28,7 @@ class ResportCreateSerializer(serializers.ModelSerializer):
                'bob', 
                'type_work', 
                'position',
+               'unity',
                'quantity',
                'frame',
                'floor',
@@ -47,7 +48,7 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ReportsName
-        fields = ['id', 'name', 'project', 'status_user', 'status_contractor', 'resposts', 'report_file', 'respost_comment', 'user', 'create_at']
+        fields = ['id', 'name', 'project', 'status_user', 'status_contractor', 'resposts', 'report_file', 'respost_comment', 'user', 'company', 'create_at']
 
     def create(self, validated_data):
         respost_image = validated_data.pop('report_file', [])
@@ -59,6 +60,7 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
         reports_name = ReportsName.objects.create(**validated_data)
         # Foydalanuvchi bilan bog'lash
         reports_name.user = self.context.get('user')
+        reports_name.company = self.context.get('company')
         reports_name.status_user = 1
         reports_name.status_contractor = 1
         reports_name.save()

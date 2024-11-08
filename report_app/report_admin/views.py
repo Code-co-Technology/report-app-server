@@ -55,6 +55,21 @@ class AdminReportsView(APIView):
         return paginator.get_paginated_response(serializer.data)
 
 
+class AdminOwnerReportView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdmin]
+
+    @swagger_auto_schema(
+        tags=['Report Admin'],
+        responses={200: ReportsNamesSerializer(many=True)}
+    )
+    def get(self, request, pk):
+        instances = ReportsName.objects.filter(company=pk)
+        serializer = ReportsNamesSerializer(instances, many=True, context={'request':request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class AdminReportView(APIView):
     render_classes = [UserRenderers]
     authentication_classes = [JWTAuthentication]

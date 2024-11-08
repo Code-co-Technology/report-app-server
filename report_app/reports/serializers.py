@@ -70,6 +70,7 @@ class ResportsSerializer(serializers.ModelSerializer):
                'bob', 
                'type_work', 
                'position',
+               'unity',
                'quantity',
                'frame',
                'floor',
@@ -114,6 +115,7 @@ class ReportsNamesSerializer(serializers.ModelSerializer):
                'constructor',
                'customer',
                'admin',
+               'company',
                'create_at'
           ]
 

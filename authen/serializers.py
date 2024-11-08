@@ -255,6 +255,7 @@ class UserInformationContractorSerializer(serializers.ModelSerializer):
             'company',
             'overdue',
             'failed_reports',
+            'summ',
             'penalty',
             'block_contractor',
             'block_sending_report',

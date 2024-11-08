@@ -22,6 +22,7 @@ class ResportCustomerSerializer(serializers.ModelSerializer):
                'bob', 
                'type_work', 
                'position',
+               'unity',
                'quantity',
                'frame',
                'floor',

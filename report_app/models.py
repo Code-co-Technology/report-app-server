@@ -1,5 +1,5 @@
 from django.db import models
-from authen.models import CustomUser
+from authen.models import CustomUser, Company
 from admin_account.models import Project
 
 
@@ -65,6 +65,7 @@ class ReportsName(models.Model):
     constructor = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='constructor', verbose_name='Подрядчики')
     customer = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='customer', verbose_name='Сотрудники')
     admin = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='admin', verbose_name='Администратора')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Компании')
     create_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -78,6 +79,7 @@ class Reports(models.Model):
     bob = models.ForeignKey(Bob, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Раздел')
     type_work = models.ForeignKey(TypeWork, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Тип работ')
     position = models.CharField(max_length=250, null=True, blank=True, verbose_name='Позиция')
+    unity = models.CharField(max_length=250, null=True, blank=True, verbose_name='Ед.изм')
     quantity = models.CharField(max_length=250, null=True, blank=True, verbose_name='Количество')
     frame = models.CharField(max_length=250, null=True, blank=True, verbose_name='Корпус')
     floor = models.CharField(max_length=250, null=True, blank=True, verbose_name='Этаж')

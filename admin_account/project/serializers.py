@@ -87,10 +87,11 @@ class AdminProjectsSerializer(serializers.ModelSerializer):
     project_image = AdminProjectImagesSerializer(many=True, read_only=True)
     project_files = AdminProjectFilesSerializer(many=True, read_only=True)
     status = ProjectStatusSerializer(read_only=True)
+    contractor = UserInformationContractorSerializer(many=True)
 
     class Meta:
         model = Project
-        fields = ['id', 'address', 'opening_date', 'submission_deadline', 'status', 'project_image', 'project_files']
+        fields = ['id', 'address', 'opening_date', 'submission_deadline', 'status', 'contractor', 'project_image', 'project_files']
 
 
 class AdminCreateProjectSerializer(serializers.ModelSerializer):
@@ -170,8 +171,13 @@ class AdminUpdateProjectSerializer(serializers.ModelSerializer):
         instance.address = validated_data.get('address', instance.address)
         instance.opening_date = validated_data.get('opening_date', instance.opening_date)
         new_submission_deadline = validated_data.get('submission_deadline', instance.submission_deadline)
+        contractors_data = validated_data.pop('contractor', [])
+
+        if contractors_data:
+            contractors_data = json.loads(contractors_data)
 
         instance.save()
+
 
         # Update ProjectImage
         if images_data:
@@ -186,42 +192,10 @@ class AdminUpdateProjectSerializer(serializers.ModelSerializer):
             ProjectSmeta.objects.filter(project=instance).delete()  # Optional: Uncomment if you want to replace files
             for file_data in files_data:
                 ProjectSmeta.objects.create(project=instance, files=file_data)
-        
-        contractors_data = validated_data.pop('contractor', None)
-    
-        # If either contractors or submission_deadline is updated
-        if contractors_data or new_submission_deadline != instance.submission_deadline:
-            if contractors_data:
-                contractors_data = json.loads(contractors_data)
 
-            # Clear existing contractor relationships only if contractors_data has changed
-            PrescriptionContractor.objects.filter(prescription__project=instance).delete()
-
-            # Check if we need to create or update Prescriptions instance
-            presc = Prescriptions.objects.filter(project=instance).first()
-            if presc is None:
-                # If no existing prescription, create a new one
-                presc = Prescriptions.objects.create(
-                    project=instance,
-                    deadline=new_submission_deadline,
-                    status=1,
-                    owner=self.context.get('owner')
-                )
-            else:
-                # Update existing prescription's deadline if it has changed
-                if new_submission_deadline != instance.submission_deadline:
-                    presc.deadline = new_submission_deadline
-                    presc.save()
-
-            # Now handle contractor assignments if contractors_data is provided
-            if contractors_data:
-                for contractor_id in contractors_data:
-                    contractor = CustomUser.objects.get(id=contractor_id)
-                    PrescriptionContractor.objects.create(
-                        prescription=presc,
-                        contractor=contractor,
-                        status=1  # Default status for contractors
-                    )
+        if contractors_data:
+            contractors = CustomUser.objects.filter(id__in=contractors_data)
+            instance.contractor.set(contractors)
 
         # Update submission deadline for the project instance if changed
         if new_submission_deadline != instance.submission_deadline:

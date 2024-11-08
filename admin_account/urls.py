@@ -1,5 +1,5 @@
 from django.urls import path
-from admin_account.project.views import AdminProjectsView, AdminProjectView, ProjectImageView, ProjectFileView, AdminProjectPrescriptionView
+from admin_account.project.views import AdminProjectsView, AdminProjectView, ProjectImageView, ProjectFileView, AdminProjectPrescriptionView, AdminProjectReportView
 from admin_account.contractor_user.views import (
     AdminOverdueView, AdminFailedReportsView, 
     AdminContractorUsersView, AdminContractorUserView, AdminContractorFalseUsersView, 
@@ -13,6 +13,7 @@ urlpatterns = [
     path('admin_account/project_image/<int:pk>/', ProjectImageView.as_view()),
     path('admin_account/project_file/<int:pk>/', ProjectFileView.as_view()),
     path('admin_account/project/prescripton/<int:pk>/', AdminProjectPrescriptionView.as_view()),
+    path('admin_account/project/report/<int:pk>/', AdminProjectReportView.as_view()),
     # Contractor user
     path('admin_account/contractor/count/', AdminContraCountUsersView.as_view()),
     path('admin_account/contractor/overdue/', AdminOverdueView.as_view()),

@@ -42,7 +42,7 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ReportsName
-        fields = ['id', 'name', 'respost_comment', 'status_user', 'status_contractor', 'report_file', 'status_customer', 'resposts', 'constructor', 'create_at']
+        fields = ['id', 'name', 'project',  'respost_comment', 'status_user', 'status_contractor', 'report_file', 'status_customer', 'resposts', 'constructor', 'create_at']
 
     def create(self, validated_data):
         constructor = self.context.get('constructor')
@@ -115,6 +115,7 @@ class ReportsNameConstructorSerializer(serializers.ModelSerializer):
         instance.status_user = validated_data.get('status_user', instance.status_user)
         instance.status_contractor = validated_data.get('status_contractor', instance.status_contractor)
         instance.status_customer = validated_data.get('status_customer', instance.status_customer)
+        instance.project = validated_data.get('project', instance.project)
         instance.constructor = self.context.get('constructor')
         instance.save()
         # Resposts'larni yangilash yoki qo'shish

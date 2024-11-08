@@ -1,5 +1,6 @@
 from django.db import models
 from authen.models import CustomUser
+from admin_account.models import Project
 
 
 class Bob(models.Model):
@@ -28,6 +29,7 @@ class TypeWork(models.Model):
 
 class ReportsName(models.Model):
     name = models.CharField(max_length=250, verbose_name='Название отчета')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Проект')
     STATUS_USER = (
         (1, 'Отправлено'),
         (2, 'Принято'),

@@ -47,7 +47,7 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ReportsName
-        fields = ['id', 'name', 'status_user', 'status_contractor', 'resposts', 'report_file', 'respost_comment', 'user', 'create_at']
+        fields = ['id', 'name', 'project', 'status_user', 'status_contractor', 'resposts', 'report_file', 'respost_comment', 'user', 'create_at']
 
     def create(self, validated_data):
         respost_image = validated_data.pop('report_file', [])
@@ -108,6 +108,7 @@ class ReportsNameCreateSerializer(serializers.ModelSerializer):
 
         # Instance ma'lumotlarini yangilash
         instance.name = validated_data.get('name', instance.name)
+        instance.project = validated_data.get('project', instance.project)
         instance.status_user = validated_data.get('status_user', instance.status_user)
         instance.status_contractor = validated_data.get('status_contractor', instance.status_contractor)
         instance.save()

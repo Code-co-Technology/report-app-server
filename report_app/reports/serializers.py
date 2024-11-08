@@ -1,8 +1,15 @@
 from rest_framework import serializers
 
+from admin_account.models import Project
 from authen.serializers import UserInformationSerializer, UserInformationAdminSerializer, UserInformationContractorSerializer, UserInformationCustomerSerializer
 from report_app.models import Bob, TypeWork, ReportsName, Reports, RespostComment, ReportFile
 
+
+class ProjectReportSerializer(serializers.ModelSerializer):
+
+     class Meta:
+          model = Project
+          fields = ['id', 'address']
 
 class BobSerializers(serializers.ModelSerializer):
     
@@ -86,11 +93,13 @@ class ReportsNamesSerializer(serializers.ModelSerializer):
      status_contractor = serializers.CharField(source='get_status_contractor_display')
      status_customer = serializers.CharField(source='get_status_customer_display')
      status = serializers.CharField(source='get_status_display')
+     project = ProjectReportSerializer(read_only=True)
 
      class Meta:
           model = ReportsName
           fields = [
                'id', 
+               'project',
                'name', 
                'user',
                'constructor',

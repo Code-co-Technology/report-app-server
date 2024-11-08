@@ -11,6 +11,9 @@ from utils.pagination import PaginationList
 from utils.renderers import UserRenderers
 from utils.permissions import IsAdmin
 
+from report_app.models import ReportsName
+from report_app.reports.serializers import ReportsNamesSerializer
+
 from prescription.constractor_app.serializers import ConstractorPrescriptionsSerializer
 from prescription.models import PrescriptionContractor
 from admin_account.models import Project, ProjectImage, ProjectSmeta
@@ -70,6 +73,21 @@ class AdminProjectPrescriptionView(APIView):
     def get(self, request, pk):
         instances = PrescriptionContractor.objects.filter(prescription__project__id=pk)
         serializer = ConstractorPrescriptionsSerializer(instances, many=True, context={'request':request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+class AdminProjectReportView(APIView):
+    render_classes = [UserRenderers]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdmin]
+
+    @swagger_auto_schema(
+        tags=['Admin Account Project'],
+        responses={200: ReportsNamesSerializer(many=True)},
+    )
+    def get(self, request, pk):
+        instances = ReportsName.objects.filter(project__id=pk)
+        serializer = ReportsNamesSerializer(instances, many=True, context={'request':request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

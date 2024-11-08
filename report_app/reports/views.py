@@ -26,7 +26,7 @@ class ReportProjectView(APIView):
         operation_summary='Section Reports'
     )
     def get(self, request):
-        instances = Project.objects.filter(status__id=1, contractor=request.user).order_by('-id')
+        instances = Project.objects.filter(status__id=1, contractor__company=request.user.company).order_by('-id')
         serializer = ProjectReportSerializer(instances, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 

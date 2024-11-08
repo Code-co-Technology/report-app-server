@@ -95,6 +95,7 @@ class ReportsNamesSerializer(serializers.ModelSerializer):
      status_customer = serializers.CharField(source='get_status_customer_display')
      status = serializers.CharField(source='get_status_display')
      project = ProjectReportSerializer(read_only=True)
+     is_report = serializers.SerializerMethodField()
 
      class Meta:
           model = ReportsName
@@ -116,6 +117,10 @@ class ReportsNamesSerializer(serializers.ModelSerializer):
                'customer',
                'admin',
                'company',
-               'create_at'
+               'create_at',
+               'is_report'
           ]
 
+     def get_is_report(self, obj):
+          # Agar `user` mavjud bo'lsa, `True` qaytaramiz
+          return obj.user is not None

@@ -65,6 +65,7 @@ class ReportsNameCustomerSerializer(serializers.ModelSerializer):
             bob_id = respost_data.get('bob')
             type_work_id = respost_data.get('type_work')
             position = respost_data.get('position')
+            unity = respost_data.get('unity')
             quantity = respost_data.get('quantity')
             frame = respost_data.get('frame')
             floor = respost_data.get('floor')
@@ -83,6 +84,7 @@ class ReportsNameCustomerSerializer(serializers.ModelSerializer):
                     bob=bob, 
                     type_work=type_work,
                     position=position,
+                    unity=unity,
                     quantity=quantity,
                     frame=frame,
                     floor=floor,
@@ -133,6 +135,7 @@ class ReportsNameCustomerSerializer(serializers.ModelSerializer):
             type_work_instance = get_object_or_404(TypeWork, id=type_work_id)
 
             position = respost_data_item.get('position')
+            unity = respost_data_item.get('unity')
             quantity = respost_data_item.get('quantity')
             frame = respost_data_item.get('frame')
             floor = respost_data_item.get('floor')
@@ -147,6 +150,7 @@ class ReportsNameCustomerSerializer(serializers.ModelSerializer):
                 respost.bob = bob_instance 
                 respost.type_work = type_work_instance
                 respost.position=position,
+                respost.unity = unity,
                 respost.quantity=quantity,
                 respost.frame=frame,
                 respost.floor=floor,

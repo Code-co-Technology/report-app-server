@@ -101,7 +101,7 @@ class UserReportsView(APIView):
         operation_summary='Submit a report.'
     )
     def post(self, request):
-        serializer = ReportsNameCreateSerializer(data=request.data, context={'user':request.user, 'request':request})
+        serializer = ReportsNameCreateSerializer(data=request.data, context={'user':request.user, 'request':request, 'company':request.user.compnay})
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

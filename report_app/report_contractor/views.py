@@ -164,7 +164,7 @@ class ContractorReportsView(APIView):
         operation_summary='Submit a report.'
     )
     def post(self, request):
-        serializer = ReportsNameConstructorSerializer(data=request.data, context={'constructor':request.user, 'request':request})
+        serializer = ReportsNameConstructorSerializer(data=request.data, context={'constructor':request.user, 'request':request, 'company':request.user.compnay})
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
